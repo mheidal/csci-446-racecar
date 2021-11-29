@@ -1,8 +1,8 @@
+import random
 from typing import List, Tuple
 from enum import IntEnum
 import numpy as np
 
-import geometry
 from race_car import RaceCar
 from geometry import Point, LineSegment, detect_intersection
 
@@ -23,6 +23,11 @@ class Track:
             self.parse_file(track_file)
         self._str: str = ""
         self.track_name: str = track_file.split(".")[0]
+        self.start_states: List[Tuple[int, int]] = []
+
+    def start_state(self) -> Tuple[int, int]:
+        return random.choice(self.start_states)
+
 
     def get_boundaries_of_type(self, type: CellType) -> List[List[LineSegment]]:
         cells: List[List[LineSegment]] = []
@@ -73,6 +78,7 @@ class Track:
                     type = CellType(0)
                 elif cell == "S":
                     type = CellType(1)
+                    self.start_states.append((i, j))
                 elif cell == "F":
                     type = CellType(2)
                 else:

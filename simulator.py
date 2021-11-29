@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from racecar.race_car import RaceCar
 from racecar.track import Track
 
@@ -5,12 +7,14 @@ from racecar.track import Track
 class Simulator:
 
     def __init__(self) -> None:
-        self.race_car: RaceCar = RaceCar()
         self.track: Track = Track()
+        start_state: Tuple[int, int] = self.track.start_state()
+        self.race_car: RaceCar = RaceCar(start_state[0], start_state[1])
         self.time: int = 0
-        pass
 
     def time_step(self) -> None:
+        self.race_car.x = self.race_car.x + (self.race_car.v_x * 1) + (.5 * (self.race_car.a_x * 1**2))
+        self.race_car.y = self.race_car.y + (self.race_car.v_y * 1) + (.5 * (self.race_car.a_y * 1 ** 2))
         pass
 
     def act(self) -> None:
