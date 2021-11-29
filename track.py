@@ -1,7 +1,10 @@
-from typing import List
+from typing import List, Tuple
 from enum import IntEnum
 import numpy as np
-from racecar.race_car import RaceCar
+
+import geometry
+from race_car import RaceCar
+from geometry import Point, LineSegment, detect_intersection
 
 
 class CellType(IntEnum):
@@ -21,11 +24,39 @@ class Track:
         self._str: str = ""
         self.track_name: str = track_file.split(".")[0]
 
+    def get_boundaries_of_type(self, type: CellType) -> List[List[LineSegment]]:
+        cells: List[List[LineSegment]] = []
+        for i, row in enumerate(self.track):
+            for j, cell in enumerate(row):
+                if cell == type:
+                    boundaries = []
+                    boundaries.append(LineSegment(Point(i, j), Point(i, j+1)))
+                    boundaries.append(LineSegment(Point(i, j), Point(i+1, j)))
+                    boundaries.append(LineSegment(Point(i+1, j), Point(i+1, j+1)))
+                    boundaries.append(LineSegment(Point(i, j+1), Point(i+1, j+1)))
+                    cells.append(boundaries)
+        return cells
+
+
     def detect_collision(self, race_car: RaceCar) -> bool:
-        pass
+        trajectory: LineSegment = LineSegment(Point(race_car.x, race_car.y),
+                                 Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
+        wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
+        for cell in wall_cells:
+            for line_segment in cell:
+                if geometry.detect_intersection(trajectory, line_segment):
+                    return True
+        return False
 
     def detect_finish(self, race_car: RaceCar) -> bool:
-        pass
+        trajectory: LineSegment = LineSegment(Point(race_car.x, race_car.y),
+                                              Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
+        finish_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.FINISH)
+        for cell in finish_cells:
+            for line_segment in cell:
+                if geometry.detect_intersection(trajectory, line_segment):
+                    return True
+        return False
 
     def parse_file(self, track_file: str) -> None:
         filename: str = "tracks/" + track_file
@@ -72,11 +103,14 @@ class Track:
 
 
 def test():
-    tracks = ['L-track.txt', 'O-track.txt', 'R-track.txt']
-    for track in tracks:
-        t = Track(track)
-        print(t)
-
+ #   tracks = ['L-track.txt', 'O-track.txt', 'R-track.txt']
+#    for track in tracks:
+    t = Track("L-track.txt")
+    cells = t.get_boundaries_of_type(CellType.START)
+    for cell in cells:
+        print(cell[0])
+        for line in cell[1]:
+            print(line)
 
 if __name__ == "__main__":
     test()

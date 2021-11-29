@@ -6,8 +6,8 @@ class RaceCar:
         self.a_y: int = 0
         self.v_x: int = 0
         self.v_y: int = 0
-        self.x: int
-        self.y: int
+        self.x: int = 0 #TODO: NEEDS TO BE ACTUALLY INITIALIZED
+        self.y: int = 0
         pass
 
     def accelerate(self) -> None:
