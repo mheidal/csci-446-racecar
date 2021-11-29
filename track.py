@@ -15,17 +15,16 @@ class CellType(IntEnum):
 class Track:
 
     def __init__(self, track_file: str = None):
+        self.start_states: List[Tuple[int, int]] = []
         if track_file is None:
             self.parse_file("L-track.txt")
         else:
             self.parse_file(track_file)
         self._str: str = ""
         self.track_name: str = track_file.split(".")[0]
-        self.start_states: List[Tuple[int, int]] = []
 
     def start_state(self) -> Tuple[int, int]:
         return random.choice(self.start_states)
-
 
     def detect_collision(self, race_car: RaceCar) -> bool:
         pass
