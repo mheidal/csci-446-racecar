@@ -1,5 +1,5 @@
 
-class Racecar:
+class RaceCar:
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
