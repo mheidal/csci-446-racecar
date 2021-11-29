@@ -1,0 +1,2 @@
+class RaceCar:
+    pass
