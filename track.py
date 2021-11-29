@@ -1,4 +1,5 @@
-from typing import List
+import random
+from typing import List, Tuple
 from enum import IntEnum
 import numpy as np
 from racecar.race_car import RaceCar
@@ -20,6 +21,11 @@ class Track:
             self.parse_file(track_file)
         self._str: str = ""
         self.track_name: str = track_file.split(".")[0]
+        self.start_states: List[Tuple[int, int]] = []
+
+    def start_state(self) -> Tuple[int, int]:
+        return random.choice(self.start_states)
+
 
     def detect_collision(self, race_car: RaceCar) -> bool:
         pass
@@ -42,6 +48,7 @@ class Track:
                     type = CellType(0)
                 elif cell == "S":
                     type = CellType(1)
+                    self.start_states.append((i, j))
                 elif cell == "F":
                     type = CellType(2)
                 else:
