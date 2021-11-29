@@ -13,6 +13,8 @@ class Simulator:
         self.time: int = 0
 
     def time_step(self) -> None:
+        self.race_car.x = self.race_car.x + (self.race_car.v_x * 1) + (.5 * (self.race_car.a_x * 1**2))
+        self.race_car.y = self.race_car.y + (self.race_car.v_y * 1) + (.5 * (self.race_car.a_y * 1 ** 2))
         pass
 
     def act(self) -> None:
