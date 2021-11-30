@@ -20,4 +20,3 @@ class RaceCar:
             self.a_y -= 1
         self.v_x = self.v_x + (self.a_x * 1)
         self.v_y = self.v_y + (self.a_y * 1)
-
