@@ -1,7 +1,7 @@
 from typing import Dict, Tuple, List
 
-from racecar.model import Model
-from racecar.simulator import Simulator
+from model import Model
+from simulator import Simulator
 
 
 class ValueIterator:

@@ -17,13 +17,14 @@ class CellType(IntEnum):
 class Track:
 
     def __init__(self, track_file: str = None):
+        self.start_states: List[Tuple[int, int]] = []
         if track_file is None:
             self.parse_file("L-track.txt")
         else:
             self.parse_file(track_file)
         self._str: str = ""
         self.track_name: str = track_file.split(".")[0]
-        self.start_states: List[Tuple[int, int]] = []
+
 
     def start_state(self) -> Tuple[int, int]:
         return random.choice(self.start_states)
@@ -49,7 +50,7 @@ class Track:
         wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
         for cell in wall_cells:
             for line_segment in cell:
-                if geometry.detect_intersection(trajectory, line_segment):
+                if detect_intersection(trajectory, line_segment):
                     return True
         return False
 
@@ -114,9 +115,8 @@ def test():
     t = Track("L-track.txt")
     cells = t.get_boundaries_of_type(CellType.START)
     for cell in cells:
-        print(cell[0])
-        for line in cell[1]:
-            print(line)
+        for line_segment in cell:
+            print(line_segment)
 
 if __name__ == "__main__":
     test()
