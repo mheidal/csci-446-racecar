@@ -5,7 +5,6 @@ import numpy as np
 
 from race_car import RaceCar
 from geometry import Point, LineSegment, detect_intersection
-from racecar import geometry
 
 
 class CellType(IntEnum):
@@ -50,7 +49,7 @@ class Track:
         wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
         for cell in wall_cells:
             for line_segment in cell:
-                if geometry.detect_intersection(trajectory, line_segment):
+                if detect_intersection(trajectory, line_segment):
                     return True
         return False
 
@@ -60,7 +59,7 @@ class Track:
         finish_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.FINISH)
         for cell in finish_cells:
             for line_segment in cell:
-                if geometry.detect_intersection(trajectory, line_segment):
+                if detect_intersection(trajectory, line_segment):
                     return True
         return False
 
@@ -115,9 +114,8 @@ def test():
     t = Track("L-track.txt")
     cells = t.get_boundaries_of_type(CellType.START)
     for cell in cells:
-        print(cell[0])
-        for line in cell[1]:
-            print(line)
+        for line_segment in cell:
+            print(line_segment)
 
 if __name__ == "__main__":
     test()
