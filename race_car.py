@@ -10,7 +10,7 @@ class RaceCar:
         self.y: int = y_init
 
     def __str__(self) -> str:
-        return f"RaceCar:\ts\tv\ta\nx:\t\t\t{self.x}\t{self.v_x}\t{self.a_x}\n\t\t\t{self.y}\t{self.v_y}\t{self.a_y}"
+        return f"RaceCar:\ts\tv\ta\nx:\t\t\t{self.x}\t{self.v_x}\t{self.a_x}\ny: \t\t\t{self.y}\t{self.v_y}\t{self.a_y}"
 
     def accelerate(self, vertical_acceleration: int = 0, horizontal_acceleration: int = 0) -> None:
         max_positive_acceleration: int = 1
