@@ -79,7 +79,7 @@ class Track:
                     type = CellType(0)
                 elif cell == "S":
                     type = CellType(1)
-                    self.start_states.append((i, j))
+                    self.start_states.append((j, i))
                 elif cell == "F":
                     type = CellType(2)
                 else:

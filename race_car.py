@@ -10,14 +10,33 @@ class RaceCar:
         self.y: int = y_init
 
     def accelerate(self, vertical_acceleration: int = 0, horizontal_acceleration: int = 0) -> None:
+        max_positive_acceleration: int = 1
+        max_positive_velocity: int = 5
 
-        if vertical_acceleration > 0 and self.a_y < 5:
+        # update accelerations
+        if vertical_acceleration > 0:
             self.a_y += 1
-        elif vertical_acceleration < 0 and self.a_y > -5:
+        elif vertical_acceleration < 0:
             self.a_y -= 1
-        if horizontal_acceleration > 0 and self.a_x < 5:
+        if horizontal_acceleration > 0:
             self.a_x += 1
-        elif horizontal_acceleration < 0 and self.a_x > -5:
-            self.a_y -= 1
-        self.v_x = self.v_x + (self.a_x * 1)
-        self.v_y = self.v_y + (self.a_y * 1)
+        elif horizontal_acceleration < 0:
+            self.a_x -= 1
+
+        # constrain to be in +/-1
+        self.a_x = self.a_x if self.a_x <= max_positive_acceleration else max_positive_acceleration
+        self.a_x = self.a_x if self.a_x >= -max_positive_acceleration else -max_positive_acceleration
+
+        self.a_y = self.a_y if self.a_y <= max_positive_acceleration else max_positive_acceleration
+        self.a_y = self.a_y if self.a_y >= -max_positive_acceleration else -max_positive_acceleration
+
+        # approx. of kinematics for velocity
+        self.v_x = self.a_x + self.v_x
+        self.v_y = self.a_y + self.v_y
+
+        # constrain vel. to be in +/-5
+        self.v_x = self.v_x if self.v_x <= max_positive_velocity else max_positive_velocity
+        self.v_x = self.v_x if self.v_x >= -max_positive_velocity else -max_positive_velocity
+
+        self.v_y = self.v_y if self.v_y <= max_positive_velocity else max_positive_velocity
+        self.v_y = self.v_y if self.v_y >= -max_positive_velocity else -max_positive_velocity

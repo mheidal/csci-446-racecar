@@ -15,8 +15,10 @@ class Simulator:
 
     def time_step(self) -> None:
         self.time += 1
-        self.race_car.x = self.race_car.x + (self.race_car.v_x * 1) + (.5 * (self.race_car.a_x * 1 ** 2))
-        self.race_car.y = self.race_car.y + (self.race_car.v_y * 1) + (.5 * (self.race_car.a_y * 1 ** 2))
+
+        # approx. of kinematics for position update
+        self.race_car.x = self.race_car.v_x + self.race_car.x
+        self.race_car.y = self.race_car.v_y + self.race_car.y
 
     def act(self) -> None:
         pass
