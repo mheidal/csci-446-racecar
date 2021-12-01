@@ -70,8 +70,8 @@ class Track:
         x, y = f.readline().strip('\n').split(',')
         self.track = np.zeros((int(x), int(y)))
         line = f.readline()
-        i: int = 0
-        j: int = 0
+        i: int = 0  # this is y
+        j: int = 0  # this is x
         while line:
             for j, cell in enumerate(line.strip("\n")):
                 type: CellType = None

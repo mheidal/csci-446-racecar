@@ -21,12 +21,12 @@ class Simulator:
         self.race_car.y = self.race_car.v_y + self.race_car.y
 
     def act(self) -> None:
-        pass
+        self.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
 
 
 if __name__ == "__main__":
     sim: Simulator = Simulator()
     for i in range(0, 100):
         sim.time_step()
-        sim.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
+        sim.act()
     pass
