@@ -24,7 +24,27 @@ class Model:
         return state_space
 
     def transition(self, initial_state: State, x_a: int, y_a: int) -> Tuple[int, int]:
-        pass
+        
+        # max_positive_acceleration: int = 1
+        # max_positive_velocity: int = 5
+        #
+        # # constrain to be in +/-1
+        # self.a_x = self.a_x if self.a_x <= max_positive_acceleration else max_positive_acceleration
+        # self.a_x = self.a_x if self.a_x >= -max_positive_acceleration else -max_positive_acceleration
+        #
+        # self.a_y = self.a_y if self.a_y <= max_positive_acceleration else max_positive_acceleration
+        # self.a_y = self.a_y if self.a_y >= -max_positive_acceleration else -max_positive_acceleration
+        #
+        # # approx. of kinematics for velocity
+        # self.v_x = self.a_x + self.v_x
+        # self.v_y = self.a_y + self.v_y
+        #
+        # # constrain vel. to be in +/-5
+        # self.v_x = self.v_x if self.v_x <= max_positive_velocity else max_positive_velocity
+        # self.v_x = self.v_x if self.v_x >= -max_positive_velocity else -max_positive_velocity
+        #
+        # self.v_y = self.v_y if self.v_y <= max_positive_velocity else max_positive_velocity
+        # self.v_y = self.v_y if self.v_y >= -max_positive_velocity else -max_positive_velocity
 
-    def reward(self, state: Tuple[int, int]) -> float:
+    def reward(self, state: State) -> float:
         pass
