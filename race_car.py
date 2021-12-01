@@ -1,16 +1,12 @@
+from state import State
 
 class RaceCar:
 
-    def __init__(self, x_init: int, y_init: int) -> None:
-        self.a_x: int = 0
-        self.a_y: int = 0
-        self.v_x: int = 0
-        self.v_y: int = 0
-        self.x: int = x_init
-        self.y: int = y_init
+    def __init__(self, initial_state: State) -> None:
+        self.state = initial_state
 
     def __str__(self) -> str:
-        return f"RaceCar:\ts\tv\ta\nx:\t\t\t{self.x}\t{self.v_x}\t{self.a_x}\ny: \t\t\t{self.y}\t{self.v_y}\t{self.a_y}"
+        return f"RaceCar:\ts\tv\ta\nx:\t\t\t{self.state.x_pos}\t{self.state.x_vel}\ny: \t\t\t{self.state.y_pos}\t{self.state.y_vel}"
 
     def accelerate(self, vertical_acceleration: int = 0, horizontal_acceleration: int = 0) -> None:
         max_positive_acceleration: int = 1
