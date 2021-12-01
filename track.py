@@ -22,9 +22,8 @@ class Track:
             self.parse_file("L-track.txt")
         else:
             self.parse_file(track_file)
+            self.track_name: str = track_file.split(".")[0]
         self._str: str = ""
-        self.track_name: str = track_file.split(".")[0]
-
 
     def start_state(self) -> Tuple[int, int]:
         return random.choice(self.start_states)
@@ -60,7 +59,7 @@ class Track:
         finish_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.FINISH)
         for cell in finish_cells:
             for line_segment in cell:
-                if geometry.detect_intersection(trajectory, line_segment):
+                if detect_intersection(trajectory, line_segment):
                     return True
         return False
 
@@ -70,8 +69,8 @@ class Track:
         x, y = f.readline().strip('\n').split(',')
         self.track = np.zeros((int(x), int(y)))
         line = f.readline()
-        i: int = 0
-        j: int = 0
+        i: int = 0  # this is y
+        j: int = 0  # this is x
         while line:
             for j, cell in enumerate(line.strip("\n")):
                 type: CellType = None
@@ -79,7 +78,7 @@ class Track:
                     type = CellType(0)
                 elif cell == "S":
                     type = CellType(1)
-                    self.start_states.append((i, j))
+                    self.start_states.append((j, i))
                 elif cell == "F":
                     type = CellType(2)
                 else:

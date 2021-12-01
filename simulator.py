@@ -1,3 +1,4 @@
+import random
 from typing import Tuple
 
 from racecar.race_car import RaceCar
@@ -13,9 +14,20 @@ class Simulator:
         self.time: int = 0
 
     def time_step(self) -> None:
-        self.race_car.x = self.race_car.x + (self.race_car.v_x * 1) + (.5 * (self.race_car.a_x * 1**2))
-        self.race_car.y = self.race_car.y + (self.race_car.v_y * 1) + (.5 * (self.race_car.a_y * 1 ** 2))
-        pass
+        self.time += 1
+
+        # approx. of kinematics for position update
+        self.race_car.x = self.race_car.v_x + self.race_car.x
+        self.race_car.y = self.race_car.v_y + self.race_car.y
 
     def act(self) -> None:
-        pass
+        self.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
+
+
+if __name__ == "__main__":
+    sim: Simulator = Simulator()
+    print(sim.race_car)
+    for i in range(0, 100):
+        sim.time_step()
+        sim.act()
+    pass
