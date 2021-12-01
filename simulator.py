@@ -26,6 +26,7 @@ class Simulator:
 
 if __name__ == "__main__":
     sim: Simulator = Simulator()
+    print(sim.race_car)
     for i in range(0, 100):
         sim.time_step()
         sim.act()
