@@ -28,8 +28,8 @@ class Simulator:
         self.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
 
     def manual_control(self) -> None:
-        print(self.track.detect_finish(self.race_car))
-        while(self.track.detect_finish(self.race_car) == False):
+        print(self.model.track.detect_finish(self.race_car))
+        while(self.model.track.detect_finish(self.race_car) == False):
             print("hello")
             direction = input("")
             # if you press a
