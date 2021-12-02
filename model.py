@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple
 
 from simulator import Simulator
 from track import Track
-
+from state import State
 
 class Model:
 
@@ -14,9 +14,16 @@ class Model:
         # self.action_space:
 
     def initialize_state_space(self):
-        pass
+        possible_velocities = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+        state_space: Dict[Tuple[int, int, int, int], State] = {}
+        for y, row in enumerate(self.track.track):
+            for x, cell in enumerate(row):
+                for i in possible_velocities:
+                    for j in possible_velocities:
+                        state_space[(x, y, i, j)] = State(x, y, i, j)
+        return state_space
 
-    def transition(self, initial_state: Tuple[int, int], action: int) -> Tuple[int, int]:
+    def transition(self, initial_state: State, x_a: int, y_a: int) -> Tuple[int, int]:
         pass
 
     def reward(self, state: Tuple[int, int]) -> float:
