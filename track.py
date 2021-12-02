@@ -1,10 +1,11 @@
 import random
-from typing import List, Tuple
+from typing import List
 from enum import IntEnum
 import numpy as np
 
 from race_car import RaceCar
 from geometry import Point, LineSegment, detect_intersection
+from state import State
 
 
 class CellType(IntEnum):
@@ -17,7 +18,7 @@ class CellType(IntEnum):
 class Track:
 
     def __init__(self, track_file: str = None):
-        self.start_states: List[Tuple[int, int]] = []
+        self.start_states: List[State] = []
         if track_file is None:
             self.parse_file("L-track.txt")
         else:
@@ -25,9 +26,8 @@ class Track:
             self.track_name: str = track_file.split(".")[0]
         self._str: str = ""
 
-    def start_state(self) -> Tuple[int, int]:
+    def start_state(self) -> State:
         return random.choice(self.start_states)
-
 
     def get_boundaries_of_type(self, type: CellType) -> List[List[LineSegment]]:
         cells: List[List[LineSegment]] = []
@@ -35,17 +35,16 @@ class Track:
             for j, cell in enumerate(row):
                 if cell == type:
                     boundaries = []
-                    boundaries.append(LineSegment(Point(i, j), Point(i, j+1)))
-                    boundaries.append(LineSegment(Point(i, j), Point(i+1, j)))
-                    boundaries.append(LineSegment(Point(i+1, j), Point(i+1, j+1)))
-                    boundaries.append(LineSegment(Point(i, j+1), Point(i+1, j+1)))
+                    boundaries.append(LineSegment(Point(i, j), Point(i, j + 1)))
+                    boundaries.append(LineSegment(Point(i, j), Point(i + 1, j)))
+                    boundaries.append(LineSegment(Point(i + 1, j), Point(i + 1, j + 1)))
+                    boundaries.append(LineSegment(Point(i, j + 1), Point(i + 1, j + 1)))
                     cells.append(boundaries)
         return cells
 
-
     def detect_collision(self, race_car: RaceCar) -> bool:
         trajectory: LineSegment = LineSegment(Point(race_car.x, race_car.y),
-                                 Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
+                                              Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
         wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
         for cell in wall_cells:
             for line_segment in cell:
@@ -78,7 +77,7 @@ class Track:
                     type = CellType(0)
                 elif cell == "S":
                     type = CellType(1)
-                    self.start_states.append((j, i))
+                    self.start_states.append(State(j, i, 0, 0))
                 elif cell == "F":
                     type = CellType(2)
                 else:
@@ -109,13 +108,14 @@ class Track:
 
 
 def test():
- #   tracks = ['L-track.txt', 'O-track.txt', 'R-track.txt']
-#    for track in tracks:
+    #   tracks = ['L-track.txt', 'O-track.txt', 'R-track.txt']
+    #    for track in tracks:
     t = Track("L-track.txt")
     cells = t.get_boundaries_of_type(CellType.START)
     for cell in cells:
         for line_segment in cell:
             print(line_segment)
+
 
 if __name__ == "__main__":
     test()
