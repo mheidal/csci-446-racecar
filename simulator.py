@@ -1,9 +1,11 @@
 import random
 from typing import Tuple
 
-from model import Model
 from race_car import RaceCar
-from racecar.state import State
+from track import Track
+from model import Model
+from state import State
+from race_car import RaceCar
 from track import Track
 
 
@@ -25,6 +27,23 @@ class Simulator:
     def act(self) -> None:
         self.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
 
+    def manual_control(self) -> None:
+        print(self.track.detect_finish(self.race_car))
+        while(self.track.detect_finish(self.race_car) == False):
+            print("hello")
+            direction = input("")
+            # if you press a
+            if (direction == 'a'):
+                self.race_car.accelerate(0, -1)
+            # if you press d
+            if (direction == 'd'):
+                self.race_car.accelerate(0, 1)
+            # if you press w
+            if (direction == 'w'):
+                self.race_car.accelerate(1, 0)
+            # if you press s
+            if (direction == 's'):
+                self.race_car.accelerate(-1, 0)
 
 if __name__ == "__main__":
     sim: Simulator = Simulator()
