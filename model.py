@@ -2,6 +2,7 @@ from typing import List, Dict, Tuple
 
 from track import Track
 from state import State
+from race_car import RaceCar
 
 class Model:
 
@@ -40,27 +41,6 @@ class Model:
                                  x_vel_after,
                                  y_vel_after)]
 
-        # max_positive_acceleration: int = 1
-        # max_positive_velocity: int = 5
-        #
-        # # constrain to be in +/-1
-        # self.a_x = self.a_x if self.a_x <= max_positive_acceleration else max_positive_acceleration
-        # self.a_x = self.a_x if self.a_x >= -max_positive_acceleration else -max_positive_acceleration
-        #
-        # self.a_y = self.a_y if self.a_y <= max_positive_acceleration else max_positive_acceleration
-        # self.a_y = self.a_y if self.a_y >= -max_positive_acceleration else -max_positive_acceleration
-        #
-        # # approx. of kinematics for velocity
-        # self.v_x = self.a_x + self.v_x
-        # self.v_y = self.a_y + self.v_y
-        #
-        # # constrain vel. to be in +/-5
-        # self.v_x = self.v_x if self.v_x <= max_positive_velocity else max_positive_velocity
-        # self.v_x = self.v_x if self.v_x >= -max_positive_velocity else -max_positive_velocity
-        #
-        # self.v_y = self.v_y if self.v_y <= max_positive_velocity else max_positive_velocity
-        # self.v_y = self.v_y if self.v_y >= -max_positive_velocity else -max_positive_velocity
-
     def reward(self, state: State) -> float:
         pass
 
@@ -68,9 +48,11 @@ def test_model():
 
     m = Model(Track())
 
-    print(m.start_state)
-
-    print(m.transition(m.start_state, 1, 0))
+    r = RaceCar(m.start_state)
+    print(r)
+    print()
+    r.state = m.transition(r.state, 1, 0)
+    print(r)
 
 if __name__ == "__main__":
     test_model()

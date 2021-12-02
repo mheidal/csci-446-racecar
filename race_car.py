@@ -6,7 +6,7 @@ class RaceCar:
         self.state = initial_state
 
     def __str__(self) -> str:
-        return f"RaceCar:\ts\tv\ta\nx:\t\t\t{self.state.x_pos}\t{self.state.x_vel}\ny: \t\t\t{self.state.y_pos}\t{self.state.y_vel}"
+        return f"RaceCar:\ts\tv\nx:\t\t\t{self.state.x_pos}\t{self.state.x_vel}\ny: \t\t\t{self.state.y_pos}\t{self.state.y_vel}"
 
     def accelerate(self, vertical_acceleration: int = 0, horizontal_acceleration: int = 0) -> None:
         max_positive_acceleration: int = 1
