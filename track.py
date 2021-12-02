@@ -53,8 +53,8 @@ class Track:
         return False
 
     def detect_finish(self, race_car: RaceCar) -> bool:
-        trajectory: LineSegment = LineSegment(Point(race_car.x, race_car.y),
-                                              Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
+        trajectory: LineSegment = LineSegment(Point(race_car.state.x_pos, race_car.state.y_pos),
+                                              Point(race_car.state.x_pos + race_car.state.x_vel, race_car.state.y_pos + race_car.state.y_vel))
         finish_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.FINISH)
         for cell in finish_cells:
             for line_segment in cell:
