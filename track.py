@@ -19,7 +19,7 @@ class CellType(IntEnum):
 class Track:
 
     def __init__(self, track_file: str = None):
-        self.start_states: List[Tuple[int, int]] = []
+        self.start_states: List[State] = []
         if track_file is None:
             self.parse_file("L-track.txt")
         else:
@@ -27,7 +27,7 @@ class Track:
             self.track_name: str = track_file.split(".")[0]
         self._str: str = ""
 
-    def start_state(self) -> Tuple[int, int]:
+    def start_state(self) -> State:
         return random.choice(self.start_states)
 
 
@@ -55,9 +55,9 @@ class Track:
                     return True
         return False
 
-    def detect_finish(self, race_car: RaceCar) -> bool:
-        trajectory: LineSegment = LineSegment(Point(race_car.x, race_car.y),
-                                              Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
+    def detect_finish(self, state: State) -> bool:
+        trajectory: LineSegment = LineSegment(Point(state.x_pos, state.y_pos),
+                                              Point(state.x_pos + state.x_vel, state.y_pos + state.y_vel))
         finish_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.FINISH)
         for cell in finish_cells:
             for line_segment in cell:
@@ -80,7 +80,7 @@ class Track:
                     type = CellType(0)
                 elif cell == "S":
                     type = CellType(1)
-                    self.start_states.append((j, i))
+                    self.start_states.append(State(j, i, 0, 0))
                 elif cell == "F":
                     type = CellType(2)
                 else:

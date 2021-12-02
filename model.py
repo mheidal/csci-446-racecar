@@ -1,6 +1,5 @@
 from typing import List, Dict, Tuple
 
-from simulator import Simulator
 from track import Track
 from state import State
 
