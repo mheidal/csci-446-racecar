@@ -25,7 +25,11 @@ class QLearner:
                         for x_acceleration in [-1, 0, 1]:
                             for y_acceleration in [-1, 0, 1]:
                                 self.q[(State(x_position, y_position, x_velocity, y_velocity), (x_acceleration, y_acceleration))] = 0
-        print(self.q)
+        entries: int = 0
+        for key in self.q:
+            print(f"key: {str(key[0]), key[1]} value:{self.q.get(key)}")
+            entries += 1
+        print(entries)
 
 
     def q_learn(self) -> None:
