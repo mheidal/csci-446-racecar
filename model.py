@@ -10,6 +10,9 @@ class Model:
         self.bellman_error_epsilon: float
         self.track = track
         self.state_space = self.initialize_state_space()
+
+        self.start_state = track.start_state() # THE STATE THE CAR STARTS IN
+        self.special_state = State(-1, -1, 0, 0) # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
         # self.action_space:
 
     def initialize_state_space(self):
@@ -22,8 +25,20 @@ class Model:
                         state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
-    def transition(self, initial_state: State, x_a: int, y_a: int) -> Tuple[int, int]:
-        pass
+    def transition(self, state: State, x_a: int, y_a: int) -> State:
+        if self.track.detect_collision(State(state.x_pos, state.y_pos, state.x_vel + x_a, state.y_vel + y_a)):
+            return self.start_state
+        if self.track.detect_finish(State(state.x_pos, state.y_pos, state.x_vel + x_a, state.y_vel + y_a)):
+            return self.special_state
+
+        x_vel_after = state.x_vel + x_a if (state.x_vel + x_a < 6 and state.x_vel + x_a > -6) else state.x_vel
+        y_vel_after = state.y_vel + y_a if (state.y_vel + y_a < 6 and state.y_vel + y_a > -6) else state.y_vel
+
+
+        return self.state_space[(state.x_pos + x_vel_after,
+                                 state.y_pos + y_vel_after,
+                                 x_vel_after,
+                                 y_vel_after)]
 
         # max_positive_acceleration: int = 1
         # max_positive_velocity: int = 5
@@ -48,3 +63,14 @@ class Model:
 
     def reward(self, state: State) -> float:
         pass
+
+def test_model():
+
+    m = Model(Track())
+
+    print(m.start_state)
+
+    print(m.transition(m.start_state, 1, 0))
+
+if __name__ == "__main__":
+    test_model()
