@@ -24,7 +24,8 @@ class Model:
         return state_space
 
     def transition(self, initial_state: State, x_a: int, y_a: int) -> Tuple[int, int]:
-        
+        pass
+
         # max_positive_acceleration: int = 1
         # max_positive_velocity: int = 5
         #

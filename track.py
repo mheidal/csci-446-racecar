@@ -5,7 +5,9 @@ import numpy as np
 
 from race_car import RaceCar
 from geometry import Point, LineSegment, detect_intersection
+from state import State
 
+import turtle
 
 class CellType(IntEnum):
     WALL = 0
@@ -31,21 +33,21 @@ class Track:
 
     def get_boundaries_of_type(self, type: CellType) -> List[List[LineSegment]]:
         cells: List[List[LineSegment]] = []
-        for i, row in enumerate(self.track):
-            for j, cell in enumerate(row):
+        for y, row in enumerate(self.track):
+            for x, cell in enumerate(row):
                 if cell == type:
                     boundaries = []
-                    boundaries.append(LineSegment(Point(i, j), Point(i, j+1)))
-                    boundaries.append(LineSegment(Point(i, j), Point(i+1, j)))
-                    boundaries.append(LineSegment(Point(i+1, j), Point(i+1, j+1)))
-                    boundaries.append(LineSegment(Point(i, j+1), Point(i+1, j+1)))
+                    boundaries.append(LineSegment(Point(x-0.5, y-0.5), Point(x+0.5, y-0.5))) # top
+                    boundaries.append(LineSegment(Point(x-0.5, y-0.5), Point(x-0.5, y+0.5))) # left
+                    boundaries.append(LineSegment(Point(x+0.5, y-0.5), Point(x+0.5, y+0.5))) # right
+                    boundaries.append(LineSegment(Point(x-0.5, y+0.5), Point(x+0.5, y+0.5))) # bottom
+
                     cells.append(boundaries)
         return cells
 
-
-    def detect_collision(self, race_car: RaceCar) -> bool:
-        trajectory: LineSegment = LineSegment(Point(race_car.x, race_car.y),
-                                 Point(race_car.x + race_car.v_x, race_car.y + race_car.v_y))
+    def detect_collision(self, state: State) -> bool:
+        trajectory: LineSegment = LineSegment(Point(state.x_pos, state.y_pos),
+                                 Point(state.x_pos + state.x_vel, state.y_pos + state.y_vel))
         wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
         for cell in wall_cells:
             for line_segment in cell:
@@ -109,13 +111,37 @@ class Track:
 
 
 def test():
- #   tracks = ['L-track.txt', 'O-track.txt', 'R-track.txt']
-#    for track in tracks:
-    t = Track("L-track.txt")
-    cells = t.get_boundaries_of_type(CellType.START)
-    for cell in cells:
-        for line_segment in cell:
-            print(line_segment)
+    track = Track("L-track.txt")
+    s = turtle.getscreen()
+    t = turtle.Turtle()
+    s.tracer(0)
+    t.hideturtle()
+    turtle.hideturtle()
+
+    cells = track.get_boundaries_of_type(CellType.WALL)
+    for boundaries in cells:
+        for boundary in boundaries:
+            t.penup()
+            t.goto(boundary.p1.x * 10, boundary.p1.y * 10)
+            t.pendown()
+            t.goto(boundary.p2.x * 10, boundary.p2.y * 10)
+
+    coll = track.detect_collision(State(2,6, 0, 1))
+    if coll:
+        t.color('red')
+    else:
+        t.color('green')
+
+
+    t.penup()
+    t.goto(2*10,6*10)
+    print(" asdf")
+    t.pendown()
+    t.goto(2*10, 7*10)
+    s.update()
+
+    turtle.mainloop()
+
 
 if __name__ == "__main__":
     test()
