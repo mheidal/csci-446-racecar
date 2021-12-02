@@ -5,6 +5,7 @@ import numpy as np
 
 from race_car import RaceCar
 from geometry import Point, LineSegment, detect_intersection
+from race_car import RaceCar
 
 
 class CellType(IntEnum):
@@ -22,7 +23,12 @@ class Track:
             self.parse_file("L-track.txt")
         else:
             self.parse_file(track_file)
+        self._str: str = ""
+        if track_file is not None:
             self.track_name: str = track_file.split(".")[0]
+        else:
+            self.track_name = "L-track"
+            #self.track_name: str = track_file.split(".")[0]
         self._str: str = ""
 
     def start_state(self) -> Tuple[int, int]:

@@ -43,3 +43,13 @@ class RaceCar:
 
         self.v_y = self.v_y if self.v_y <= max_positive_velocity else max_positive_velocity
         self.v_y = self.v_y if self.v_y >= -max_positive_velocity else -max_positive_velocity
+
+    # def accelerate(self, direction) -> None:
+    #     if(direction == 'right'):
+    #         self.a_x += 1
+    #     if (direction == 'left'):
+    #         self.a_x -= 1
+    #     if (direction == 'up'):
+    #         self.a_y += 1
+    #     if (direction == 'down'):
+    #         self.a_y -= 1
