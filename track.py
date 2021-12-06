@@ -9,6 +9,8 @@ from state import State
 
 import turtle
 
+scale_factor: float = 10
+
 class CellType(IntEnum):
     WALL = 0
     START = 1
@@ -18,7 +20,7 @@ class CellType(IntEnum):
 
 class Track:
 
-    def __init__(self, track_file: str = None):
+    def __init__(self, track_file: str = None, turt: turtle.Turtle = None):
         self.start_states: List[State] = []
         if track_file is None:
             self.parse_file("L-track.txt")
@@ -26,6 +28,9 @@ class Track:
             self.parse_file(track_file)
             self.track_name: str = track_file.split(".")[0]
         self._str: str = ""
+        self.t = turt
+        if self.t is not None:
+            self.display_track_with_turtle()
 
     def start_state(self) -> State:
         return random.choice(self.start_states)
@@ -109,39 +114,43 @@ class Track:
         else:
             return self._str
 
+    def display_track_with_turtle(self):
+        self.s = turtle.getscreen()
+        self.s.tracer(0)
+        self.t = turtle.Turtle()
+        turtle.hideturtle()
+        self.t.hideturtle()
+        self.t.shape("circle")
+        self.t.resizemode("user")
+        self.t.turtlesize(0.1, 0.1, 0.1)
+
+        cells = self.get_boundaries_of_type(CellType.WALL)
+        for boundaries in cells:
+            for boundary in boundaries:
+                self.t.penup()
+                self.t.goto(boundary.p1.x * scale_factor, boundary.p1.y * -scale_factor)
+                self.t.pendown()
+                self.t.goto(boundary.p2.x * scale_factor, boundary.p2.y * -scale_factor)
+        self.s.update()
+
+    def display_transition_with_turtle(self, initial_state: State):
+        if self.detect_collision(initial_state):
+            self.t.color("red")
+        elif self.detect_finish(initial_state):
+            self.t.color("green")
+        else:
+            self.t.color("blue")
+        self.t.penup()
+        self.t.goto(initial_state.x_pos * scale_factor, initial_state.y_pos * -scale_factor)
+        self.t.pendown()
+        self.t.goto(scale_factor * (initial_state.x_pos + initial_state.x_vel), -scale_factor * (initial_state.y_pos + initial_state.y_vel))
+        self.t.stamp()
+        self.t.color("black")
+        self.s.update()
+
 
 def test():
-    track = Track("L-track.txt")
-    s = turtle.getscreen()
-    t = turtle.Turtle()
-    s.tracer(0)
-    t.hideturtle()
-    turtle.hideturtle()
-
-    cells = track.get_boundaries_of_type(CellType.WALL)
-    for boundaries in cells:
-        for boundary in boundaries:
-            t.penup()
-            t.goto(boundary.p1.x * 10, boundary.p1.y * 10)
-            t.pendown()
-            t.goto(boundary.p2.x * 10, boundary.p2.y * 10)
-
-    coll = track.detect_collision(State(2,6, 0, 1))
-    if coll:
-        t.color('red')
-    else:
-        t.color('green')
-
-
-    t.penup()
-    t.goto(2*10,6*10)
-    print(" asdf")
-    t.pendown()
-    t.goto(2*10, 7*10)
-    s.update()
-
-    turtle.mainloop()
-
+    track = Track("L-track.txt", True)
 
 if __name__ == "__main__":
     test()
