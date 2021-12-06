@@ -25,11 +25,11 @@ class QLearner:
                         for x_acceleration in [-1, 0, 1]:
                             for y_acceleration in [-1, 0, 1]:
                                 self.q[(State(x_position, y_position, x_velocity, y_velocity), (x_acceleration, y_acceleration))] = 0
-        entries: int = 0
-        for key in self.q:
-            print(f"key: {str(key[0]), key[1]} value:{self.q.get(key)}")
-            entries += 1
-        print(entries)
+        # entries: int = 0
+        # for key in self.q:
+        #     print(f"key: {str(key[0]), key[1]} value: {self.q.get(key)}")
+        #     entries += 1
+        # print(entries)
 
 
     def q_learn(self) -> None:
@@ -41,6 +41,7 @@ class QLearner:
         #       apply action a
         #       observe Reward(s, a) and successor state s'
         #       Q(s, a) <-- Q(s, a) + alpha( Reward(s, a)) + [gamma * max_a' * Q(s', a')] - Q(s, a) )
+        #       Q(s,a) = prevQ(s,a) + alpha * [reward for moving to this state + gamma (discount factor) * largest Qval aval for any action in the current state (largest predicted sum of future rewards)]
         #       s <-- s'
         #   until s is terminal state: if x,y is a finish state... detect_finish() from Track maybe?
         # end for loop
