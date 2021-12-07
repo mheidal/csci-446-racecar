@@ -1,5 +1,6 @@
 from state import State
 
+
 class RaceCar:
 
     def __init__(self, initial_state: State) -> None:

@@ -20,31 +20,28 @@ class Simulator:
 
     def time_step(self) -> None:
         self.time += 1
-
-        # approx. of kinematics for position update
-        self.race_car.x = self.race_car.v_x + self.race_car.x
-        self.race_car.y = self.race_car.v_y + self.race_car.y
+        self.act()
 
     def act(self) -> None:
-        self.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
+        self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
 
-    def manual_control(self) -> None:
-        print(self.model.track.detect_finish(self.race_car.state))
-        while(self.model.track.detect_finish(self.race_car.state) == False):
-            direction = input("")
-            # if you press a
-            if (direction == 'a'):
-                self.race_car.state = self.model.transition(self.race_car.state, 0, -1)
-            # if you press d
-            if (direction == 'd'):
-                self.race_car.state = self.model.transition(self.race_car.state, 0, 1)
-            # if you press w
-            if (direction == 'w'):
-                self.race_car.state = self.model.transition(self.race_car.state, 1, 0)
-            # if you press s
-            if (direction == 's'):
-                self.race_car.state = self.model.transition(self.race_car.state, -1, 0)
-            print(self.__str__())
+    # def manual_control(self) -> None:
+    #     print(self.model.track.detect_finish(self.race_car.state))
+    #     while(self.model.track.detect_finish(self.race_car.state) == False):
+    #         direction = input("")
+    #         # if you press a
+    #         if (direction == 'a'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, 0, -1)
+    #         # if you press d
+    #         if (direction == 'd'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, 0, 1)
+    #         # if you press w
+    #         if (direction == 'w'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, 1, 0)
+    #         # if you press s
+    #         if (direction == 's'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, -1, 0)
+    #         print(self.__str__())
 
     def __str__(self):
         #if self._str == "":

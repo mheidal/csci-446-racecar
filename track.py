@@ -11,6 +11,7 @@ import turtle
 
 scale_factor: float = 10
 
+
 class CellType(IntEnum):
     WALL = 0
     START = 1
@@ -22,6 +23,7 @@ class Track:
 
     def __init__(self, track_file: str = None, turt: turtle.Turtle = None):
         self.start_states: List[State] = []
+        self.finish_states: List[State] = []
         if track_file is None:
             self.parse_file("L-track.txt")
         else:
@@ -35,24 +37,23 @@ class Track:
     def start_state(self) -> State:
         return random.choice(self.start_states)
 
-
     def get_boundaries_of_type(self, type: CellType) -> List[List[LineSegment]]:
         cells: List[List[LineSegment]] = []
         for y, row in enumerate(self.track):
             for x, cell in enumerate(row):
                 if cell == type:
                     boundaries = []
-                    boundaries.append(LineSegment(Point(x-0.5, y-0.5), Point(x+0.5, y-0.5))) # top
-                    boundaries.append(LineSegment(Point(x-0.5, y-0.5), Point(x-0.5, y+0.5))) # left
-                    boundaries.append(LineSegment(Point(x+0.5, y-0.5), Point(x+0.5, y+0.5))) # right
-                    boundaries.append(LineSegment(Point(x-0.5, y+0.5), Point(x+0.5, y+0.5))) # bottom
+                    boundaries.append(LineSegment(Point(x - 0.5, y - 0.5), Point(x + 0.5, y - 0.5)))  # top
+                    boundaries.append(LineSegment(Point(x - 0.5, y - 0.5), Point(x - 0.5, y + 0.5)))  # left
+                    boundaries.append(LineSegment(Point(x + 0.5, y - 0.5), Point(x + 0.5, y + 0.5)))  # right
+                    boundaries.append(LineSegment(Point(x - 0.5, y + 0.5), Point(x + 0.5, y + 0.5)))  # bottom
 
                     cells.append(boundaries)
         return cells
 
     def detect_collision(self, state: State) -> bool:
         trajectory: LineSegment = LineSegment(Point(state.x_pos, state.y_pos),
-                                 Point(state.x_pos + state.x_vel, state.y_pos + state.y_vel))
+                                              Point(state.x_pos + state.x_vel, state.y_pos + state.y_vel))
         wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
         for cell in wall_cells:
             for line_segment in cell:
@@ -88,6 +89,7 @@ class Track:
                     self.start_states.append(State(j, i, 0, 0))
                 elif cell == "F":
                     type = CellType(2)
+                    self.finish_states.append(State(j, i, 0, 0))
                 else:
                     type = CellType(3)
                 self.track[i][j] = type
@@ -143,7 +145,8 @@ class Track:
         self.t.penup()
         self.t.goto(initial_state.x_pos * scale_factor, initial_state.y_pos * -scale_factor)
         self.t.pendown()
-        self.t.goto(scale_factor * (initial_state.x_pos + initial_state.x_vel), -scale_factor * (initial_state.y_pos + initial_state.y_vel))
+        self.t.goto(scale_factor * (initial_state.x_pos + initial_state.x_vel),
+                    -scale_factor * (initial_state.y_pos + initial_state.y_vel))
         self.t.stamp()
         self.t.color("black")
         self.s.update()
@@ -151,6 +154,7 @@ class Track:
 
 def test():
     track = Track("L-track.txt", True)
+
 
 if __name__ == "__main__":
     test()
