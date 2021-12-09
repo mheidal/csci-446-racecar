@@ -1,14 +1,20 @@
 import turtle
 from typing import List, Dict, Tuple
+from enum import IntEnum
 
-from track import Track
+from track import Track, TransitionType
 from state import State
 from race_car import RaceCar
 from random import random
 
+class CrashType(IntEnum):
+    RESTART = 0,
+    STOP = 1
+
 class Model:
 
-    def __init__(self, track: Track) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
+        self.crash_type = crash_type
         self.discount_factor_gamma: float
         self.bellman_error_epsilon: float
         self.track = track
@@ -46,15 +52,34 @@ class Model:
         if self.track.t is not None:
             self.track.display_transition_with_turtle(State(state.x_pos, state.y_pos, x_vel_after, y_vel_after))
 
-        if self.track.detect_collision(State(state.x_pos, state.y_pos, x_vel_after, y_vel_after)):
-            return self.start_state
-        elif self.track.detect_finish(State(state.x_pos, state.y_pos, x_vel_after, x_vel_after)):
-            return self.special_state
-        else:
-            return self.state_space[(state.x_pos + x_vel_after,
-                                    state.y_pos + y_vel_after,
-                                    x_vel_after,
-                                    y_vel_after)]
+        if self.crash_type == CrashType.RESTART:
+            transition_type = self.track.get_transition_type_without_point(
+                State(state.x_pos, state.y_pos, x_vel_after, y_vel_after))
+            if transition_type == TransitionType.CRASH:
+                return self.start_state
+            elif transition_type == TransitionType.WIN:
+                return self.special_state
+            else:
+                return self.state_space[(state.x_pos + x_vel_after,
+                                         state.y_pos + y_vel_after,
+                                         x_vel_after,
+                                         y_vel_after)]
+
+        elif self.crash_type == CrashType.STOP:
+            transition_data = self.track.get_transition_type(
+                State(state.x_pos, state.y_pos, x_vel_after, y_vel_after))
+            if type(transition_data) == tuple:
+                transition_type, last_point = transition_data
+                return State(last_point.x, last_point.y, 0, 0)
+            else:
+                if transition_data == TransitionType.WIN:
+                    return self.special_state
+                else:
+                    return self.state_space[(state.x_pos + x_vel_after,
+                                         state.y_pos + y_vel_after,
+                                         x_vel_after,
+                                         y_vel_after)]
+
 
     def reward(self, state: State) -> float:
         return 0 if state == self.special_state else -1
@@ -69,6 +94,7 @@ def test_model():
     def display_r():
         print(r)
         track.s.update()
+        print()
 
     def trans_1():
         r.state = m.transition(r.state, -1, 1)
