@@ -8,7 +8,7 @@ def main():
     pressed_key = input("Press Spacebar then Enter to Start")
     if(pressed_key == " "):
         print(track)
-    print("W = Up, A = Left, S = Down, D = Right ")
+    print("w = Up, a = Left, s = Down, d = Right ")
     #call simulator
     simulator.manual_control()
 

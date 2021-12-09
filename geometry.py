@@ -14,6 +14,12 @@ class Point:
         self.y = y
     def __str__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
+    def __eq__(self, other):
+        if (self.x == other.x and self.y == other.y):
+            return True
+        else:
+            return False
+
 
     def __eq__(self, other):
         if type(other) == Point:
@@ -59,6 +65,9 @@ def detect_if_intersect(l1: LineSegment, l2: LineSegment):
     o2 = get_orientation(p1, q1, q2)
     o3 = get_orientation(p2, q2, p1)
     o4 = get_orientation(p2, q2, q1)
+
+    if (l1.p1 == l1.p2):
+        return False
 
     # General case
     return ((o1 != o2) and (o3 != o4))
