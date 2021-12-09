@@ -57,7 +57,7 @@ class Model:
                                      x_vel_after,
                                      y_vel_after)]
 
-    def reward(self, state: State) -> float:
+    def reward(self, state: State) -> int:
         return 0 if state == self.special_state else -1
 
 

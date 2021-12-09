@@ -1,4 +1,5 @@
 import random
+import turtle
 from typing import Tuple
 
 from race_car import RaceCar
@@ -11,8 +12,8 @@ from track import Track
 
 class Simulator:
 
-    def __init__(self) -> None:
-        self.model: Model = Model(Track())
+    def __init__(self, *, activate_turtle: bool = False) -> None:
+        self.model: Model = Model(Track()) if not activate_turtle else Model(Track(None, turtle.Turtle()))
         self._str = ""
         start_state: State = self.model.track.start_state()
         self.race_car: RaceCar = RaceCar(start_state)
@@ -22,8 +23,12 @@ class Simulator:
         self.time += 1
         self.act()
 
-    def act(self) -> None:
-        self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
+    def act(self, a_x: int = None, a_y: int = None) -> None:
+        if not a_x and not a_y:
+            self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]),
+                                                        random.choice([-1, 0, 1]))
+        else:
+            self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
 
     # def manual_control(self) -> None:
     #     print(self.model.track.detect_finish(self.race_car.state))
