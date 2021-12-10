@@ -19,16 +19,20 @@ class Simulator:
         self.race_car: RaceCar = RaceCar(start_state)
         self.time: int = 0
 
-    def time_step(self) -> None:
-        self.time += 1
-        self.act()
+    # def time_step(self) -> None:
+    #     self.time += 1
+    #     self.act()
 
-    def act(self, a_x: int = None, a_y: int = None) -> None:
-        if not a_x and not a_y:
-            self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]),
-                                                        random.choice([-1, 0, 1]))
-        else:
-            self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
+    # def act(self, a_x: int = None, a_y: int = None) -> None:
+    #     if not a_x and not a_y:
+    #         self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]),
+    #                                                     random.choice([-1, 0, 1]))
+    #     else:
+    #         self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
+
+    def act(self, a_x: int, a_y: int) -> None:
+        self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
+        self.time += 1
 
     # def manual_control(self) -> None:
     #     print(self.model.track.detect_finish(self.race_car.state))

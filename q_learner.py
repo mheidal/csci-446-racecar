@@ -59,15 +59,17 @@ class QLearner:
             self.previous_reward: int = 0
             current_state: State = self.simulator.race_car.state
             while current_state not in self.simulator.model.track.finish_states:
-                alpha: float = 0
+                alpha: float = 1
 
                 # choose a derived from Q
                 a_x: int
                 a_y: int
                 accelerations: List[Tuple[int, int]] = []
                 acceleration_probability_distribution: List[float] = []
-                accelerations, acceleration_probability_distribution = self.boltzmann_distribution(self.simulator.race_car.state)
-                a_x, a_y = random.choices(accelerations, weights=acceleration_probability_distribution)
+                boltzmann: Tuple[List[Tuple[int, int]], List[float]] = self.boltzmann_distribution(self.simulator.race_car.state)
+                accelerations = boltzmann[0]
+                acceleration_probability_distribution = boltzmann[1]
+                a_x, a_y = random.choices(accelerations, weights=acceleration_probability_distribution)[0]
 
                 # apply action a
                 self.simulator.act(a_x, a_y)
@@ -121,8 +123,12 @@ class QLearner:
             probability_distribution_a_given_s[key[1]] = value
             summation += value
 
-        for key in state_action_dict:
-            probability_distribution_a_given_s[key[1]] = probability_distribution_a_given_s[key[1]] / summation
+        if summation == 0:
+            for key in state_action_dict:
+                probability_distribution_a_given_s[key[1]] = 1/9
+        else:
+            for key in state_action_dict:
+                probability_distribution_a_given_s[key[1]] = probability_distribution_a_given_s[key[1]] / summation
 
         # [e^(Q-sub-t(s, a)/Temp)] / [sum over all actions (a') in action space (A): (e^(Q-sub-t(s, a'))/Temp)]
 
