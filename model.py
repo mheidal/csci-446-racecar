@@ -7,9 +7,11 @@ from state import State
 from race_car import RaceCar
 from random import random
 
+
 class CrashType(IntEnum):
     RESTART = 0,
     STOP = 1
+
 
 class Model:
 
@@ -20,8 +22,8 @@ class Model:
         self.track = track
         self.state_space = self.initialize_state_space()
 
-        self.start_state = track.start_state() # THE STATE THE CAR STARTS IN
-        self.special_state = State(-1, -1, 0, 0) # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
+        self.start_state = track.start_state()  # THE STATE THE CAR STARTS IN
+        self.special_state = State(-1, -1, 0, 0)  # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
         # self.action_space:
 
     def initialize_state_space(self):
@@ -80,13 +82,13 @@ class Model:
                     return self.special_state
                 else:
                     return self.state_space[(state.x_pos + x_vel_after,
-                                         state.y_pos + y_vel_after,
-                                         x_vel_after,
-                                         y_vel_after)]
+                                             state.y_pos + y_vel_after,
+                                             x_vel_after,
+                                             y_vel_after)]
 
-
-    def reward(self, state: State) -> float:
+    def reward(self, state: State) -> int:
         return 0 if state == self.special_state else -1
+
 
 def test_model():
     turt: turtle.Turtle = turtle.Turtle()
@@ -104,38 +106,47 @@ def test_model():
         print("Transition 1")
         r.state = m.transition(r.state, -1, 1)
         display_r()
+
     def trans_2():
         print("Transition 2")
         r.state = m.transition(r.state, 0, 1)
         display_r()
+
     def trans_3():
         print("Transition 3")
         r.state = m.transition(r.state, 1, 1)
         display_r()
+
     def trans_4():
         print("Transition 4")
         r.state = m.transition(r.state, -1, 0)
         display_r()
+
     def trans_5():
         print("Transition 5")
         r.state = m.transition(r.state, 0, 0)
         display_r()
+
     def trans_6():
         print("Transition 6")
         r.state = m.transition(r.state, 1, 0)
         display_r()
+
     def trans_7():
         print("Transition 7")
         r.state = m.transition(r.state, -1, -1)
         display_r()
+
     def trans_8():
         print("Transition 8")
         r.state = m.transition(r.state, 0, -1)
         display_r()
+
     def trans_9():
         print("Transition 9")
         r.state = m.transition(r.state, 1, -1)
         display_r()
+
     def reset_screen(x, y):
         track.t.clear()
         track.display_track_with_turtle()
@@ -158,6 +169,7 @@ def test_model():
 
     track.s.listen()
     turtle.mainloop()
+
 
 if __name__ == "__main__":
     test_model()

@@ -1,4 +1,5 @@
 import random
+import turtle
 from typing import Tuple
 
 from race_car import RaceCar
@@ -11,8 +12,8 @@ from track import Track
 
 class Simulator:
 
-    def __init__(self) -> None:
-        self.model: Model = Model(Track())
+    def __init__(self, *, activate_turtle: bool = False) -> None:
+        self.model: Model = Model(Track()) if not activate_turtle else Model(Track(None, turtle.Turtle()))
         self._str = ""
         start_state: State = self.model.track.start_state()
         self.race_car: RaceCar = RaceCar(start_state)
@@ -20,34 +21,35 @@ class Simulator:
 
     def time_step(self) -> None:
         self.time += 1
+        self.act()
 
-        # approx. of kinematics for position update
-        self.race_car.x = self.race_car.v_x + self.race_car.x
-        self.race_car.y = self.race_car.v_y + self.race_car.y
+    def act(self, a_x: int = None, a_y: int = None) -> None:
+        if not a_x and not a_y:
+            self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]),
+                                                        random.choice([-1, 0, 1]))
+        else:
+            self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
 
-    def act(self) -> None:
-        self.race_car.accelerate(random.choice([-1, 0, 1]), random.choice([-1, 0, 1]))
-
-    def manual_control(self) -> None:
-        print(self.model.track.detect_finish(self.race_car.state))
-        while(self.model.track.detect_finish(self.race_car.state) == False):
-            direction = input("")
-            # if you press a
-            if (direction == 'a'):
-                self.race_car.state = self.model.transition(self.race_car.state, 0, -1)
-            # if you press d
-            if (direction == 'd'):
-                self.race_car.state = self.model.transition(self.race_car.state, 0, 1)
-            # if you press w
-            if (direction == 'w'):
-                self.race_car.state = self.model.transition(self.race_car.state, 1, 0)
-            # if you press s
-            if (direction == 's'):
-                self.race_car.state = self.model.transition(self.race_car.state, -1, 0)
-            print(self.__str__())
+    # def manual_control(self) -> None:
+    #     print(self.model.track.detect_finish(self.race_car.state))
+    #     while(self.model.track.detect_finish(self.race_car.state) == False):
+    #         direction = input("")
+    #         # if you press a
+    #         if (direction == 'a'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, 0, -1)
+    #         # if you press d
+    #         if (direction == 'd'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, 0, 1)
+    #         # if you press w
+    #         if (direction == 'w'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, 1, 0)
+    #         # if you press s
+    #         if (direction == 's'):
+    #             self.race_car.state = self.model.transition(self.race_car.state, -1, 0)
+    #         print(self.__str__())
 
     def __str__(self):
-        #if self._str == "":
+        # if self._str == "":
         string = ""
         for y, row in enumerate(self.model.track.track):
             for x, cell in enumerate(row):
@@ -65,6 +67,7 @@ class Simulator:
             string += "\n"
             self._str = string
         return self._str
+
 
 if __name__ == "__main__":
     sim: Simulator = Simulator()
