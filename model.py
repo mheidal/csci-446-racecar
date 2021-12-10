@@ -28,6 +28,8 @@ class Model:
                         state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
+
+
     def transition(self, state: State, x_acc: int, y_acc: int) -> State:
 
         x_vel_after: int
@@ -58,6 +60,10 @@ class Model:
 
     def reward(self, state: State) -> float:
         return 0 if state == self.special_state else -1
+
+    def extract_all_s_primes(self) -> List:
+
+        pass
 
 def test_model():
     turt: turtle.Turtle = turtle.Turtle()
