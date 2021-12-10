@@ -23,14 +23,14 @@ class QLearner:
         rows, columns = self.simulator.model.track.track.shape
         for x_position in range(columns):
             for y_position in range(rows):
-                if self.simulator.model.track.track[y_position][x_position] is CellType.WALL:
+                if self.simulator.model.track.track[y_position][x_position] == CellType.WALL:
                     continue
-                for x_velocity in range(-5, 5):
-                    for y_velocity in range(-5, 5):
+                for x_velocity in range(-5, 6):
+                    for y_velocity in range(-5, 6):
                         for x_acceleration in [-1, 0, 1]:
                             for y_acceleration in [-1, 0, 1]:
                                 self.q[(State(x_position, y_position, x_velocity, y_velocity),
-                                        (x_acceleration, y_acceleration))] = 0
+                                        (x_acceleration, y_acceleration))] = -1
         # entries: int = 0
         # for key in self.q:
         #     print(f"key: {str(key[0]), key[1]} value: {self.q.get(key)}")
@@ -52,13 +52,20 @@ class QLearner:
         #       s <-- s'
         #   until s is terminal state: if x,y is a finish state... detect_finish() from Track maybe?
         # end for loop
+
+        # Additions:
+        # Verify self.q is updating correctly (it's not)
+        # Tune params
+        # number of episodes should be equal to number or restarts from sim.
+        #
+
         self.init_q()
         for episode in range(number_of_episodes):
             if episode > 0:
                 self.simulator.race_car = RaceCar(self.simulator.model.track.start_state())
             self.previous_reward: int = 0
             current_state: State = self.simulator.race_car.state
-            while current_state not in self.simulator.model.track.finish_states:
+            while current_state is not self.simulator.model.special_state:
                 alpha: float = 1
 
                 # choose a derived from Q
@@ -81,8 +88,11 @@ class QLearner:
                 new_state_reward: int = self.simulator.model.reward(new_state)
 
                 # update self.q([s, a])...
-                self.q[(current_state, (a_x, a_y))] = self.q[(current_state, (a_x, a_y))] + (alpha * (
-                        new_state_reward + (self.gamma * self.q[self.q_max(new_state)]) - self.q[(current_state, (a_x, a_y))]))
+                if new_state != self.simulator.model.special_state:
+                    self.q[(current_state, (a_x, a_y))] = self.q[(current_state, (a_x, a_y))] + (alpha * (
+                            new_state_reward + (self.gamma * self.q[self.q_max(new_state)]) - self.q[(current_state, (a_x, a_y))]))
+                else:
+                    self.q[(current_state, (a_x, a_y))] = 0
 
                 # set s <= s' and
                 current_state = new_state
@@ -147,6 +157,8 @@ class QLearner:
         state_action_dict: dict = {}
         for key, value in zip(keys_list, values_list):
             state_action_dict[key] = value
+        if values_list[0] is None:
+            pass
         # from https://www.programiz.com/python-programming/methods/built-in/max#:~:text=The%20max()%20function%20returns,between%20two%20or%20more%20parameters.
         return max(state_action_dict, key=lambda k: state_action_dict[k])
 
