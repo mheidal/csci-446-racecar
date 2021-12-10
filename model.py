@@ -1,21 +1,29 @@
 import turtle
 from typing import List, Dict, Tuple
+from enum import IntEnum
 
-from track import Track
+from track import Track, TransitionType
 from state import State
 from race_car import RaceCar
 from random import random
 
+
+class CrashType(IntEnum):
+    RESTART = 0,
+    STOP = 1
+
+
 class Model:
 
-    def __init__(self, track: Track) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
+        self.crash_type = crash_type
         self.discount_factor_gamma: float
         self.bellman_error_epsilon: float
         self.track = track
         self.state_space = self.initialize_state_space()
 
-        self.start_state = track.start_state() # THE STATE THE CAR STARTS IN
-        self.special_state = State(-1, -1, 0, 0) # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
+        self.start_state = track.start_state()  # THE STATE THE CAR STARTS IN
+        self.special_state = State(-1, -1, 0, 0)  # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
         # self.action_space:
 
     def initialize_state_space(self):
@@ -28,17 +36,19 @@ class Model:
                         state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
+    def get_transitions_and_probabilities(self, state: State, x_acc: int, y_acc: int) -> List[Tuple[float, State]]:
+        return [(0.2, self.transition(state, x_acc, y_acc, success_probability=0)),
+                (0.8, self.transition(state, x_acc, y_acc, success_probability=1))]
 
-
-    def transition(self, state: State, x_acc: int, y_acc: int) -> State:
+    def transition(self, state: State, x_acc: int, y_acc: int, *, success_probability: float = 0.2) -> State:
 
         x_vel_after: int
         y_vel_after: int
 
-        oil_slick_prob = 0
-        # oil_slick_prob = random()
+        #oil_slick_prob = 0
+        oil_slick_prob = random()
 
-        if oil_slick_prob >= 0.8:
+        if oil_slick_prob >= 1 - success_probability:
             x_vel_after = state.x_vel
             y_vel_after = state.y_vel
         else:
@@ -48,22 +58,41 @@ class Model:
         if self.track.t is not None:
             self.track.display_transition_with_turtle(State(state.x_pos, state.y_pos, x_vel_after, y_vel_after))
 
-        if self.track.detect_collision(State(state.x_pos, state.y_pos, x_vel_after, y_vel_after)):
-            return self.start_state
-        elif self.track.detect_finish(State(state.x_pos, state.y_pos, x_vel_after, x_vel_after)):
-            return self.special_state
-        else:
-            return self.state_space[(state.x_pos + x_vel_after,
-                                    state.y_pos + y_vel_after,
-                                    x_vel_after,
-                                    y_vel_after)]
+        if self.crash_type == CrashType.RESTART:
+            transition_type = self.track.get_transition_type_without_point(
+                State(state.x_pos, state.y_pos, x_vel_after, y_vel_after))
+            if transition_type == TransitionType.CRASH:
+                return self.start_state
+            elif transition_type == TransitionType.WIN:
+                return self.special_state
+            else:
+                return self.state_space[(state.x_pos + x_vel_after,
+                                         state.y_pos + y_vel_after,
+                                         x_vel_after,
+                                         y_vel_after)]
 
-    def reward(self, state: State) -> float:
+        elif self.crash_type == CrashType.STOP:
+            transition_data = self.track.get_transition_type(
+                State(state.x_pos, state.y_pos, x_vel_after, y_vel_after))
+            if type(transition_data) == tuple:
+                transition_type, last_point = transition_data
+                return State(last_point.x, last_point.y, 0, 0)
+            else:
+                if transition_data == TransitionType.WIN:
+                    return self.special_state
+                else:
+                    return self.state_space[(state.x_pos + x_vel_after,
+                                             state.y_pos + y_vel_after,
+                                             x_vel_after,
+                                             y_vel_after)]
+
+    def reward(self, state: State) -> int:
         return 0 if state == self.special_state else -1
 
     def extract_all_s_primes(self) -> List:
 
         pass
+
 
 def test_model():
     turt: turtle.Turtle = turtle.Turtle()
@@ -75,39 +104,60 @@ def test_model():
     def display_r():
         print(r)
         track.s.update()
+        print()
 
     def trans_1():
+        print("Transition 1")
         r.state = m.transition(r.state, -1, 1)
         display_r()
+
     def trans_2():
+        print("Transition 2")
         r.state = m.transition(r.state, 0, 1)
         display_r()
+
     def trans_3():
+        print("Transition 3")
         r.state = m.transition(r.state, 1, 1)
         display_r()
+
     def trans_4():
+        print("Transition 4")
         r.state = m.transition(r.state, -1, 0)
         display_r()
+
     def trans_5():
+        print("Transition 5")
         r.state = m.transition(r.state, 0, 0)
         display_r()
+
     def trans_6():
+        print("Transition 6")
         r.state = m.transition(r.state, 1, 0)
         display_r()
+
     def trans_7():
+        print("Transition 7")
         r.state = m.transition(r.state, -1, -1)
         display_r()
+
     def trans_8():
+        print("Transition 8")
         r.state = m.transition(r.state, 0, -1)
         display_r()
+
     def trans_9():
+        print("Transition 9")
         r.state = m.transition(r.state, 1, -1)
         display_r()
+
     def reset_screen(x, y):
         track.t.clear()
         track.display_track_with_turtle()
         track.t.stamp()
         track.s.update()
+    def go_to_start():
+        r.state = track.start_state()
 
     track.s.onkey(trans_1, "1")
     track.s.onkey(trans_2, "2")
@@ -119,9 +169,11 @@ def test_model():
     track.s.onkey(trans_8, "8")
     track.s.onkey(trans_9, "9")
     track.s.onscreenclick(reset_screen)
+    track.s.onkey(go_to_start(), "r")
 
     track.s.listen()
     turtle.mainloop()
+
 
 if __name__ == "__main__":
     test_model()

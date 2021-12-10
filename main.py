@@ -1,6 +1,8 @@
 from track import Track
 from simulator import Simulator
 from value_iterator import ValueIterator
+
+
 def main():
 
     # track: Track = Track()
@@ -15,7 +17,6 @@ def main():
 
     vi: ValueIterator = ValueIterator()
     vi.value_iteration()
-
 
 
 
