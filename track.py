@@ -18,10 +18,12 @@ class CellType(IntEnum):
     FINISH = 2
     TRACK = 3
 
+
 class TransitionType(IntEnum):
     CRASH = 0
     WIN = 1
     MOVE = 2
+
 
 class Track:
 
@@ -47,19 +49,20 @@ class Track:
             self.s.update()
         return start_state
 
-
     def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[Tuple[Tuple[int, int], List[LineSegment]]]:
         cells: List[Tuple[Tuple[int, int], List[LineSegment]]] = []
         for y, row in enumerate(self.track):
             for x, cell in enumerate(row):
-                if (bounding_box.p1.y - 1 < y < bounding_box.p2.y + 1 or bounding_box.p1.y + 1 > y > bounding_box.p2.y - 1) \
-                        and (bounding_box.p1.x - 1 < x < bounding_box.p2.x + 1 or bounding_box.p1.x + 1 > x > bounding_box.p2.x - 1):
+                if (
+                        bounding_box.p1.y - 1 < y < bounding_box.p2.y + 1 or bounding_box.p1.y + 1 > y > bounding_box.p2.y - 1) \
+                        and (
+                        bounding_box.p1.x - 1 < x < bounding_box.p2.x + 1 or bounding_box.p1.x + 1 > x > bounding_box.p2.x - 1):
                     if cell == type:
                         boundaries = []
-                        boundaries.append(LineSegment(Point(x-0.5, y-0.5), Point(x+0.5, y-0.5))) # top
-                        boundaries.append(LineSegment(Point(x-0.5, y-0.5), Point(x-0.5, y+0.5))) # left
-                        boundaries.append(LineSegment(Point(x+0.5, y-0.5), Point(x+0.5, y+0.5))) # right
-                        boundaries.append(LineSegment(Point(x-0.5, y+0.5), Point(x+0.5, y+0.5))) # bottom
+                        boundaries.append(LineSegment(Point(x - 0.5, y - 0.5), Point(x + 0.5, y - 0.5)))  # top
+                        boundaries.append(LineSegment(Point(x - 0.5, y - 0.5), Point(x - 0.5, y + 0.5)))  # left
+                        boundaries.append(LineSegment(Point(x + 0.5, y - 0.5), Point(x + 0.5, y + 0.5)))  # right
+                        boundaries.append(LineSegment(Point(x - 0.5, y + 0.5), Point(x + 0.5, y + 0.5)))  # bottom
 
                         cells.append(((x, y), boundaries))
         return cells
@@ -113,7 +116,8 @@ class Track:
                     if detect_if_intersect(trajectory, line_segment):
                         intersection_point = find_intersection_point(line_segment, trajectory)
                         if furthest_track_boundary is None and intersection_point != last_wall_cell_intersect:
-                            furthest_track_boundary = (euclid_dist(trajectory.p1, intersection_point), intersection_point)
+                            furthest_track_boundary = (
+                            euclid_dist(trajectory.p1, intersection_point), intersection_point)
                         else:
                             if furthest_track_boundary is not None:
                                 old_dist = furthest_track_boundary[0]
@@ -122,24 +126,36 @@ class Track:
                                     furthest_track_boundary = (new_dist, intersection_point)
 
             if furthest_track_boundary is None:
-                return (TransitionType.CRASH, Point(state.x_pos, state.y_pos))
+                return TransitionType.CRASH, Point(state.x_pos, state.y_pos)
             else:
                 for cell in driveable_cells:
                     x, y = cell[0]
                     matches = 0
                     boundaries = cell[1]
                     for line_segment in boundaries:
-                        if ((line_segment.p1.x >= furthest_track_boundary[1].x >= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[1].y and line_segment.p2.y == furthest_track_boundary[1].y)
-                            or (line_segment.p1.x <= furthest_track_boundary[1].x <= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[1].y and line_segment.p2.y == furthest_track_boundary[1].y)
-                            or (line_segment.p1.y <= furthest_track_boundary[1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[1].x and line_segment.p2.x == furthest_track_boundary[1].x)
-                            or (line_segment.p1.y <= furthest_track_boundary[1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[1].x and line_segment.p2.x == furthest_track_boundary[1].x)) \
-                            or ((line_segment.p1.x >= last_wall_cell_intersect.x >= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
-                            or (line_segment.p1.x <= last_wall_cell_intersect.x <= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
-                            or (line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)
-                            or (line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)):
+                        if ((line_segment.p1.x >= furthest_track_boundary[
+                            1].x >= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[
+                                 1].y and line_segment.p2.y == furthest_track_boundary[1].y)
+                            or (line_segment.p1.x <= furthest_track_boundary[
+                                    1].x <= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[
+                                    1].y and line_segment.p2.y == furthest_track_boundary[1].y)
+                            or (line_segment.p1.y <= furthest_track_boundary[
+                                    1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[
+                                    1].x and line_segment.p2.x == furthest_track_boundary[1].x)
+                            or (line_segment.p1.y <= furthest_track_boundary[
+                                    1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[
+                                    1].x and line_segment.p2.x == furthest_track_boundary[1].x)) \
+                                or ((
+                                            line_segment.p1.x >= last_wall_cell_intersect.x >= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
+                                    or (
+                                            line_segment.p1.x <= last_wall_cell_intersect.x <= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
+                                    or (
+                                            line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)
+                                    or (
+                                            line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)):
                             matches += 1
                     if matches > 1:
-                        return (closest_intersection[1], Point(x, y))
+                        return closest_intersection[1], Point(x, y)
 
         return closest_intersection[1]
 

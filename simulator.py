@@ -49,7 +49,7 @@ class Simulator:
     #         print(self.__str__())
 
     def __str__(self):
-        #if self._str == "":
+        # if self._str == "":
         string = ""
         for y, row in enumerate(self.model.track.track):
             for x, cell in enumerate(row):
@@ -67,6 +67,7 @@ class Simulator:
             string += "\n"
             self._str = string
         return self._str
+
 
 if __name__ == "__main__":
     sim: Simulator = Simulator()
