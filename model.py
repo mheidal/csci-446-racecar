@@ -15,7 +15,7 @@ class CrashType(IntEnum):
 
 class Model:
 
-    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.RESTART) -> None:
         self.crash_type = crash_type
         self.discount_factor_gamma: float
         self.bellman_error_epsilon: float
