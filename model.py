@@ -36,15 +36,19 @@ class Model:
                         state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
-    def transition(self, state: State, x_acc: int, y_acc: int) -> State:
+    def get_transitions_and_probabilities(self, state: State, x_acc: int, y_acc: int) -> List[Tuple[float, State]]:
+        return [(0.2, self.transition(state, x_acc, y_acc, success_probability=0)),
+                (0.8, self.transition(state, x_acc, y_acc, success_probability=1))]
+
+    def transition(self, state: State, x_acc: int, y_acc: int, *, success_probability: float = 0.2) -> State:
 
         x_vel_after: int
         y_vel_after: int
 
-        oil_slick_prob = 0
-        # oil_slick_prob = random()
+        #oil_slick_prob = 0
+        oil_slick_prob = random()
 
-        if oil_slick_prob >= 0.8:
+        if oil_slick_prob >= 1 - success_probability:
             x_vel_after = state.x_vel
             y_vel_after = state.y_vel
         else:
@@ -99,38 +103,47 @@ def test_model():
         print()
 
     def trans_1():
+        print("Transition 1")
         r.state = m.transition(r.state, -1, 1)
         display_r()
 
     def trans_2():
+        print("Transition 2")
         r.state = m.transition(r.state, 0, 1)
         display_r()
 
     def trans_3():
+        print("Transition 3")
         r.state = m.transition(r.state, 1, 1)
         display_r()
 
     def trans_4():
+        print("Transition 4")
         r.state = m.transition(r.state, -1, 0)
         display_r()
 
     def trans_5():
+        print("Transition 5")
         r.state = m.transition(r.state, 0, 0)
         display_r()
 
     def trans_6():
+        print("Transition 6")
         r.state = m.transition(r.state, 1, 0)
         display_r()
 
     def trans_7():
+        print("Transition 7")
         r.state = m.transition(r.state, -1, -1)
         display_r()
 
     def trans_8():
+        print("Transition 8")
         r.state = m.transition(r.state, 0, -1)
         display_r()
 
     def trans_9():
+        print("Transition 9")
         r.state = m.transition(r.state, 1, -1)
         display_r()
 
@@ -139,6 +152,8 @@ def test_model():
         track.display_track_with_turtle()
         track.t.stamp()
         track.s.update()
+    def go_to_start():
+        r.state = track.start_state()
 
     track.s.onkey(trans_1, "1")
     track.s.onkey(trans_2, "2")
@@ -150,6 +165,7 @@ def test_model():
     track.s.onkey(trans_8, "8")
     track.s.onkey(trans_9, "9")
     track.s.onscreenclick(reset_screen)
+    track.s.onkey(go_to_start(), "r")
 
     track.s.listen()
     turtle.mainloop()
