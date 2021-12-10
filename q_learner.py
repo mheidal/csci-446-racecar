@@ -12,7 +12,7 @@ from race_car import RaceCar
 class QLearner:
 
     def __init__(self) -> None:
-        self.simulator: Simulator = Simulator()
+        self.simulator: Simulator = Simulator(activate_turtle=True)
         self.q: Dict[Tuple[State, Tuple[
             int, int]]] = {}  # make a dict of w/ key of Tuple(state, action), value: Reward. Implement the comparable and hashable methods to pass in State as an key
         self.gamma: float = 1

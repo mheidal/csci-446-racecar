@@ -36,11 +36,12 @@ class Model:
                         state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
+
     def get_transitions_and_probabilities(self, state: State, x_acc: int, y_acc: int) -> List[Tuple[float, State]]:
         return [(0.2, self.transition(state, x_acc, y_acc, success_probability=0)),
                 (0.8, self.transition(state, x_acc, y_acc, success_probability=1))]
 
-    def transition(self, state: State, x_acc: int, y_acc: int, *, success_probability: float = 0.2) -> State:
+    def transition(self, state: State, x_acc: int, y_acc: int, *, success_probability: float = 0) -> State:
 
         x_vel_after: int
         y_vel_after: int
@@ -64,6 +65,9 @@ class Model:
             if transition_type == TransitionType.CRASH:
                 return self.start_state
             elif transition_type == TransitionType.WIN:
+                print("hell yeah")
+                self.track.t.reset()
+                self.track.s.reset()
                 return self.special_state
             else:
                 return self.state_space[(state.x_pos + x_vel_after,
