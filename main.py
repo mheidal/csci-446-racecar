@@ -16,7 +16,9 @@ def main():
     # simulator.manual_control()
 
     vi: ValueIterator = ValueIterator()
-    vi.value_iteration()
+    x = vi.value_iteration()
+    print('done')
+
 
 
 

@@ -1,8 +1,7 @@
 import turtle
 from typing import List, Dict, Tuple
 from enum import IntEnum
-
-from track import Track, TransitionType
+from track import Track, TransitionType, CellType
 from state import State
 from race_car import RaceCar
 from random import random
@@ -15,13 +14,13 @@ class CrashType(IntEnum):
 
 class Model:
 
-    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.RESTART) -> None:
         self.crash_type = crash_type
         self.discount_factor_gamma: float
         self.bellman_error_epsilon: float
         self.track = track
         self.state_space = self.initialize_state_space()
-
+        self.track_state_space = self.initialize_track_state_space()
         self.start_state = track.start_state()  # THE STATE THE CAR STARTS IN
         self.special_state = State(-1, -1, 0, 0)  # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
         # self.action_space:
@@ -34,6 +33,17 @@ class Model:
                 for i in possible_velocities:
                     for j in possible_velocities:
                         state_space[(x, y, i, j)] = State(x, y, i, j)
+        return state_space
+
+    def initialize_track_state_space(self):
+        possible_velocities = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]
+        state_space: Dict[Tuple[int, int, int, int], State] = {}
+        for y, row in enumerate(self.track.track):
+            for x, cell in enumerate(row):
+                for i in possible_velocities:
+                    for j in possible_velocities:
+                        if(self.track.track[y][x] != CellType.WALL):
+                            state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
     def get_transitions_and_probabilities(self, state: State, x_acc: int, y_acc: int) -> List[Tuple[float, State]]:
@@ -88,10 +98,6 @@ class Model:
 
     def reward(self, state: State) -> int:
         return 0 if state == self.special_state else -1
-
-    def extract_all_s_primes(self) -> List:
-
-        pass
 
 
 def test_model():
