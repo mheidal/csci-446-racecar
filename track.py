@@ -9,7 +9,7 @@ from state import State
 
 import turtle
 
-scale_factor: float = 15
+scale_factor: float = 10
 
 
 class CellType(IntEnum):
