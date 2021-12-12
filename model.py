@@ -82,8 +82,8 @@ class Model:
                 self.num_wins += 1
                 self.average_transitions += self.num_transitions
                 if self.num_wins % self.record_length == 0:
-                    print(f"Win {self.num_wins} after {self.num_transitions} actions. Average over the last "
-                          f"{self.record_length}:\n\t{self.average_transitions / self.record_length}")
+                    # print(f"Win {self.num_wins} after {self.num_transitions} actions. Average over the last "
+                    #       f"{self.record_length}:\n\t{self.average_transitions / self.record_length}")
                     self.average_transitions = 0
                 self.num_transitions = 0
                 if self.track.t is not None:

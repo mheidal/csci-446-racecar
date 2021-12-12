@@ -30,30 +30,25 @@ class ValueIterator:
 
         self.init_actions()
         rows, columns = self.simulator.model.track.track.shape
+        #print("dafaq",self.simulator.model.track.track.shape)
         #print( self.simulator.model.track)
         #self.reward_dictionary = np.empty(rows, columns)
         for x_position in range(columns-1):
-            self.poop += 1
-            print(self.poop)
             for y_position in range(rows-1):
-                self.poop += 1
-                print(self.poop)
                 for x_velocity in range(-5, 6):
-                    self.poop += 1
-                    print(self.poop)
                     for y_velocity in range(-5, 6):
-                        self.poop += 1
-                        print(self.poop)
                         #print(y_position, x_position)
-                        # if self.simulator.model.track.track[y_position][x_position] == CellType.WALL:
-                        #     pass
+                        if self.simulator.model.track.track[y_position][x_position] == CellType.WALL:
+                            pass
                             #self.reward_dictionary[(x_position, y_position, x_velocity, y_velocity)] = -10
-                        if self.simulator.model.track.track[y_position][x_position] == CellType.FINISH:
+                        elif self.simulator.model.track.track[y_position][x_position] == CellType.FINISH:
                             self.reward_dictionary[(x_position, y_position, x_velocity, y_velocity)] = 0
-                            print('if')
+                            #self.poop+=1
                         else:
                             self.reward_dictionary[(x_position, y_position, x_velocity, y_velocity)] = -1
-                            print('else')
+                            #self.poop += 1
+        #print(self.poop)
+
 
         # for x_position in range(columns-1):
         #     for y_position in range(rows-1):
@@ -71,59 +66,68 @@ class ValueIterator:
         #for state in self.model.state_space:
 
     def value_iteration(self):
-        # self.init_value_iteration()
-        # values = self.reward_dictionary
-        # s_a = self.state_action_dict
-
-        self.init_actions()
+        #print(self.model.track)
+        self.init_value_iteration()
+        values = self.reward_dictionary
+        s_a = self.state_action_dict
+        #self.init_actions()
         # iterate through array
         # use bellman equation
         # for each state calculate Q(s, a)
         # first pass initalized goal states, and negative states
         # second pass initialize state next to goal states
 
-        training_iterations = 1
+        training_iterations = 100
         gamma = 1
         for train in range(training_iterations):
+            print("asfda", train)
             self.poop += 1
             #print("new", self.poop)
-            #old_v = deepcopy(values)
+            old_v = deepcopy(values)
             # Q(s,a) = max ( R(s,a) + gamma sum s' T(s,a,s') Vt-1(s') )
             for state in self.model.track_state_space.values():
-                self.poop += 1
+                #self.poop += 1
                 #print("new", self.poop)
                 q_value = []
                 for action in self.actions:
-                    self.poop +=1
+                    # self.poop +=1
                     #print("new", self.poop)
-                    if(self.poop % 10000 == 0):
-                        print("new", self.poop)
-                    # sum_of_T_V = 0
+                    # if(self.poop % 10000 == 0):
+                    #     print("new", self.poop)
+                    sum_of_T_V = 0
                     all_s_primes = self.model.get_transitions_and_probabilities(state, action[0], action[1])
                     # # get R(s,a)
-                    # reward_of_sa = self.model.reward(state)
+                    reward_of_sa = self.model.reward(state)
                     # # get all s'
                     for s_prime in all_s_primes:
-                        self.poop += 1
-                        #print("new", self.poop)
-                        # # get V(s')
-                        # s_prime_state = s_prime[1]
-                        #
-                        # value_of_s_prime = old_v.get((s_prime_state.x_pos, s_prime_state.y_pos, s_prime_state.x_vel,
-                        #                               s_prime_state.y_vel))
-                        # # get T(s,a,s'), probability that s, a, s' happens
-                        # probability_of_transition = s_prime[0]
-                        # # T(s,a,s') * V(s')
-                    #   if (self.simulator.model.track.track[s_prime_state.y_pos][s_prime_state.x_pos] == CellType.WALL):
-                    #         value_of_s_prime = -10
-                    #
-                    #     sum_of_T_V= value_of_s_prime * probability_of_transition + sum_of_T_V
-                    # expected_reward =  reward_of_sa + (gamma*sum_of_T_V)
+                        # self.poop += 1
+                        # print("new", self.poop)
+                        # get V(s')
+                        s_prime_state = s_prime[1]
+                        value_of_s_prime = old_v.get((s_prime_state.x_pos, s_prime_state.y_pos, s_prime_state.x_vel,
+                                                      s_prime_state.y_vel))
+                        # get T(s,a,s'), probability that s, a, s' happens
+                        probability_of_transition = s_prime[0]
+                        # T(s,a,s') * V(s')
+                        # if statment to set wall values
+                        if (self.simulator.model.track.track[s_prime_state.x_pos][s_prime_state.y_pos] == CellType.WALL):
+                            value_of_s_prime = -10
+
+                        # if (self.simulator.model.track.track[s_prime_state.x_pos][
+                        #     s_prime_state.y_pos] == CellType.FINISH):
+                        #     print(s_prime_state.x_pos, s_prime_state.y_pos)
+
+                        # sums all of the possible s'
+                        sum_of_T_V = value_of_s_prime * probability_of_transition + sum_of_T_V
+                        #print(sum_of_T_V)
+                    # gets total expected reward
+                    expected_reward =  reward_of_sa + (gamma * sum_of_T_V)
+                    # puts expected reward in value table and q_value list
                     #values[(state.x_pos, state.y_pos, state.x_vel, state.y_vel)] = expected_reward
-                #     q_value.append(expected_reward)
-                #
-                # values[(state.x_pos, state.y_pos, state.x_vel, state.y_vel)] = max(q_value)
-        return self.poop
+                    q_value.append(expected_reward)
+                values[(state.x_pos, state.y_pos, state.x_vel, state.y_vel)] = max(q_value)
+                #print('x')
+        return values
                 #get max action
                 #argMax = np.argmax(s_a[(state.x_pos, state.y_pos, state.x_vel, state.y_ve)])
 
