@@ -67,8 +67,9 @@ def main():
     # simulator.manual_control()
 
     vi: ValueIterator = ValueIterator()
+    print(vi.model.track)
     x = vi.value_iteration()
-    print('done')
+    print(x)
 
 
 if __name__ == "__main__":

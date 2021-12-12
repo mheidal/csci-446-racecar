@@ -16,7 +16,7 @@ class QLearner:
         self.simulator: Simulator = Simulator(activate_turtle=turtle_bool, track=track)
         self.q: Dict[Tuple[State, Tuple[
             int, int]]] = {}  # make a dict of w/ key of Tuple(state, action), value: Reward. Implement the comparable and hashable methods to pass in State as an key
-        self.gamma: float = 0.75
+        self.gamma: float = 1
         self.previous_reward: int = 0
         self.initial_temperature: int = 1
         self.temperature: int = 1

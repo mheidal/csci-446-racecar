@@ -5,6 +5,8 @@ from track import Track, TransitionType, CellType
 from state import State
 from race_car import RaceCar
 from random import random
+import json
+from os.path import exists
 
 
 class CrashType(IntEnum):
@@ -27,6 +29,9 @@ class Model:
         self.track_state_space = self.initialize_track_state_space()
         self.start_state = track.start_state()  # THE STATE THE CAR STARTS IN
         self.special_state = State(-1, -1, 0, 0)  # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
+        print("setting up trans map")
+        self.transition_map = self.init_transition_map()
+        print("finished setting up trans map")
         # self.action_space:
 
     def initialize_state_space(self):
@@ -50,6 +55,64 @@ class Model:
                             state_space[(x, y, i, j)] = State(x, y, i, j)
         return state_space
 
+    def init_transition_map(self):
+        if exists("tracks/" + self.track.track_file + "-transition-map.txt"):
+            return self.read_transition_map_from_file()
+        else:
+            table = {}
+
+            print(len(self.state_space.values()))
+            for i, state in enumerate(self.state_space.values()):
+                if i % 100 == 0:
+                    print(i)
+                for x_acc in [-1, 0, 1]:
+                    for y_acc in [-1, 0, 1]:
+                        table[(state, x_acc, y_acc)] = self.get_transitions_and_probabilities(state, x_acc, y_acc)
+            self.write_transition_map_to_file(table)
+        return table
+
+    def write_transition_map_to_file(self, table: Dict):
+        with open("tracks/" + self.track.track_file + "-transition-map.txt", 'w') as file:
+            for key, value in table.items():
+                init_state:State = key[0]
+                x_acc: int = key[1]
+                y_acc: int = key[2]
+                prob_0, final_0, prob_1, final_1 = value[0][0], value[0][1], value[1][0], value[1][1]
+                string = f"{init_state.x_pos},{init_state.y_pos},{init_state.x_vel},{init_state.y_vel},{x_acc},{y_acc}:{prob_0},{final_0.x_pos},{final_0.y_pos},{final_0.x_vel},{final_0.y_vel}:{prob_1},{final_1.x_pos},{final_1.y_pos},{final_1.x_vel},{final_1.y_vel}\n"
+                file.write(string)
+        return
+
+    def read_transition_map_from_file(self) -> Dict:
+        table = {}
+        with open("tracks/" + self.track.track_file + "-transition-map.txt", 'r') as file:
+            line = file.readline()
+            while line:
+                key, val0, val1 = line.strip("\n").split(":")
+                init_x_pos, init_y_pos, init_x_vel, init_y_vel, x_acc, y_acc = key.split(',')
+                init_state = State(int(init_x_pos), int(init_y_pos), int(init_x_vel), int(init_y_vel))
+                prob_0, final_0_x_pos, final_0_y_pos, final_0_x_vel, final_0_y_vel = val0.split(",")
+                prob_1, final_1_x_pos, final_1_y_pos, final_1_x_vel, final_1_y_vel = val1.split(",")
+
+
+                final_state_0 = State(int(final_0_x_pos), int(final_0_y_pos), int(final_0_x_vel), int(final_0_y_vel))
+                final_state_1 = State(int(final_1_x_pos), int(final_1_y_pos), int(final_1_x_vel), int(final_1_y_vel))
+                table[(init_state, int(x_acc), int(y_acc))] = ((float(prob_0), final_state_0), (float(prob_1), final_state_1))
+                line = file.readline()
+        return table
+
+    def report_progress_for_q_learn(self):
+        self.num_wins += 1
+        self.average_transitions += self.num_transitions
+        if self.num_wins % self.record_length == 0:
+            print(f"Win {self.num_wins} after {self.num_transitions} actions. Average over the last "
+                  f"{self.record_length}:\n\t{self.average_transitions / self.record_length}")
+            self.average_transitions = 0
+        self.num_transitions = 0
+        if self.track.t is not None:
+            self.track.t.clear()
+            self.track.display_track_with_turtle()
+            self.track.t.stamp()
+            self.track.s.update()
 
     def get_transitions_and_probabilities(self, state: State, x_acc: int, y_acc: int) -> List[Tuple[float, State]]:
         return [(0.2, self.transition(state, x_acc, y_acc, success_probability=0)),
@@ -79,18 +142,7 @@ class Model:
             if transition_type == TransitionType.CRASH:
                 return self.start_state
             elif transition_type == TransitionType.WIN:
-                self.num_wins += 1
-                self.average_transitions += self.num_transitions
-                if self.num_wins % self.record_length == 0:
-                    print(f"Win {self.num_wins} after {self.num_transitions} actions. Average over the last "
-                          f"{self.record_length}:\n\t{self.average_transitions / self.record_length}")
-                    self.average_transitions = 0
-                self.num_transitions = 0
-                if self.track.t is not None:
-                    self.track.t.clear()
-                    self.track.display_track_with_turtle()
-                    self.track.t.stamp()
-                    self.track.s.update()
+                # self.report_progress_for_q_learn()
                 return self.special_state
             elif transition_type == TransitionType.MOVE:
                 return self.state_space[(state.x_pos + x_vel_after,
@@ -103,11 +155,7 @@ class Model:
             if transition_type == TransitionType.CRASH:
                 return State(state.x_pos, state.y_pos, 0, 0)
             elif transition_type == TransitionType.WIN:
-                if self.track.t is not None:
-                    self.track.t.clear()
-                    self.track.display_track_with_turtle()
-                    self.track.t.stamp()
-                    self.track.s.update()
+                # self.report_progress_for_q_learn()
                 return self.special_state
             elif transition_type == TransitionType.MOVE:
                 return self.state_space[(state.x_pos + x_vel_after,
@@ -216,5 +264,32 @@ def test_model():
     turtle.mainloop()
 
 
+def test_file_storage():
+
+    init_state = State(1, 2, 3, 4)
+    x_acc = 1
+    y_acc = -1
+
+    final_0 = State(5, 6, 7, 8)
+    final_1 = State(9, 10, 11, 12)
+    prob_0 = 0.2
+    prob_1 = 0.8
+    line = f"{init_state.x_pos},{init_state.y_pos},{init_state.x_vel},{init_state.y_vel},{x_acc},{y_acc}:{prob_0},{final_0.x_pos},{final_0.y_pos},{final_0.x_vel},{final_0.y_vel}:{prob_1},{final_1.x_pos},{final_1.y_pos},{final_1.x_vel},{final_1.y_vel}\n"
+    print(line)
+    table = {}
+
+    key, val0, val1 = line.strip("\n").split(":")
+    init_x_pos, init_y_pos, init_x_vel, init_y_vel, x_acc, y_acc = key.split(',')
+    init_state = State(int(init_x_pos), int(init_y_pos), int(init_x_vel), int(init_y_vel))
+    prob_0, final_0_x_pos, final_0_y_pos, final_0_x_vel, final_0_y_vel = val0.split(",")
+    prob_1, final_1_x_pos, final_1_y_pos, final_1_x_vel, final_1_y_vel = val1.split(",")
+
+    final_state_0 = State(int(final_0_x_pos), int(final_0_y_pos), int(final_0_x_vel), int(final_0_y_vel))
+    final_state_1 = State(int(final_1_x_pos), int(final_1_y_pos), int(final_1_x_vel), int(final_1_y_vel))
+    table[(init_state, int(x_acc), int(y_acc))] = ((float(prob_0), final_state_0), (float(prob_1), final_state_1))
+    print(table)
+
+
 if __name__ == "__main__":
-    test_model()
+    test_file_storage()
+    # test_model()
