@@ -16,7 +16,7 @@ class CrashType(IntEnum):
 
 class Model:
 
-    def __init__(self, track: Track, crash_type: CrashType = CrashType.RESTART) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
         self.num_transitions = 0
         self.num_wins = 0
         self.average_transitions = 0

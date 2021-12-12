@@ -14,7 +14,7 @@ class ValueIterator:
         self.v: List[Tuple[Tuple[int, int], int]]
         self.policy: List[Tuple[Tuple[int, int], int]]
         # self.simulator: Simulator = Simulator()
-        self.model: Model = Model(Track(track_file="O-track"))
+        self.model: Model = Model(Track(track_file="R-track"))
         self.reward_dictionary: Dict[Tuple[int, int, int, int], float] = {}
         self.actions: List[Tuple[int, int]] = []
         self.state_action_dict:  Dict[Tuple[int, int, int, int, Tuple[int, int]], float] = {}
