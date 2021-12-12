@@ -13,7 +13,7 @@ from track import Track
 class Simulator:
 
     def __init__(self, *, activate_turtle: bool = False, ) -> None:
-        self.model: Model = Model(Track(track_file="R-track")) if not activate_turtle \
+        self.model: Model = Model(Track(track_file="I-track")) if not activate_turtle \
             else Model(Track("I-track", turt=turtle.Turtle()))
         self._str = ""
         start_state: State = self.model.track.start_state()

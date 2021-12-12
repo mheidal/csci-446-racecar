@@ -27,7 +27,7 @@ class TransitionType(IntEnum):
 
 class Track:
 
-    def __init__(self, track_file: str = "L-track", *, turt: turtle.Turtle = None, progressive_start_states = False):
+    def __init__(self, track_file: str = "I-track", *, turt: turtle.Turtle = None, progressive_start_states = False):
         self.start_states: List[State] = []
         self.finish_states: List[State] = []
         self.track = self.parse_file(track_file)
@@ -97,7 +97,6 @@ class Track:
         print(f"Track is\n{string}")
 
         return start_state_sets
-
 
     def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[Tuple[Tuple[int, int], List[LineSegment]]]:
         cells: List[Tuple[Tuple[int, int], List[LineSegment]]] = []

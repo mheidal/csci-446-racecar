@@ -183,6 +183,6 @@ class QLearner:
 
 
 if __name__ == "__main__":
-    q_learner: QLearner = QLearner()
-    q_learner.q_learn()
+    # q_learner: QLearner = QLearner()
+    # q_learner.q_learn()
     pass
