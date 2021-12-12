@@ -16,7 +16,7 @@ class QLearner:
         self.simulator: Simulator = Simulator(activate_turtle=False)
         self.q: Dict[Tuple[State, Tuple[
             int, int]]] = {}  # make a dict of w/ key of Tuple(state, action), value: Reward. Implement the comparable and hashable methods to pass in State as an key
-        self.gamma: float = 0.75
+        self.gamma: float = 1
         self.previous_reward: int = 0
         pass
 
@@ -42,7 +42,7 @@ class QLearner:
         #     entries += 1
         # print(entries)
 
-    def q_learn(self, *, number_of_episodes: int = 50000) -> None:
+    def q_learn(self, *, number_of_episodes: int = 10000) -> None:
         # init all Q(s, a) arbitrarily
         # for all episodes do the following
         #   initialize s
@@ -76,7 +76,7 @@ class QLearner:
                 current_division += 1
             self.simulator.model.start_state = random.choice(start_state_sets[current_division-1])
 
-            if episode >= number_of_episodes * (49750 / 50000) and self.simulator.model.track.t is None:
+            if episode >= number_of_episodes * (9900 / 10000) and self.simulator.model.track.t is None:
                 self.simulator.model.track.t = turtle.Turtle()
                 self.simulator.model.track.display_track_with_turtle()
 
