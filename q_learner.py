@@ -2,6 +2,7 @@ import math
 import operator
 import random
 from typing import Tuple, List, Dict, Any
+import turtle
 
 from track import CellType
 from simulator import Simulator
@@ -12,10 +13,10 @@ from race_car import RaceCar
 class QLearner:
 
     def __init__(self) -> None:
-        self.simulator: Simulator = Simulator(activate_turtle=True)
+        self.simulator: Simulator = Simulator(activate_turtle=False)
         self.q: Dict[Tuple[State, Tuple[
             int, int]]] = {}  # make a dict of w/ key of Tuple(state, action), value: Reward. Implement the comparable and hashable methods to pass in State as an key
-        self.gamma: float = 1
+        self.gamma: float = 0.75
         self.previous_reward: int = 0
         pass
 
@@ -23,21 +24,25 @@ class QLearner:
         rows, columns = self.simulator.model.track.track.shape
         for x_position in range(columns):
             for y_position in range(rows):
+                x = self.simulator.model.start_state.x_pos
+                y = self.simulator.model.start_state.y_pos
                 if self.simulator.model.track.track[y_position][x_position] == CellType.WALL:
                     continue
                 for x_velocity in range(-5, 6):
                     for y_velocity in range(-5, 6):
                         for x_acceleration in [-1, 0, 1]:
                             for y_acceleration in [-1, 0, 1]:
+
                                 self.q[(State(x_position, y_position, x_velocity, y_velocity),
                                         (x_acceleration, y_acceleration))] = -1
+        return
         # entries: int = 0
         # for key in self.q:
         #     print(f"key: {str(key[0]), key[1]} value: {self.q.get(key)}")
         #     entries += 1
         # print(entries)
 
-    def q_learn(self, *, number_of_episodes: int = 10) -> None:
+    def q_learn(self, *, number_of_episodes: int = 50000) -> None:
         # init all Q(s, a) arbitrarily
         # for all episodes do the following
         #   initialize s
@@ -58,11 +63,25 @@ class QLearner:
         # Tune params
         # number of episodes should be equal to number or restarts from sim.
         #
-
         self.init_q()
+        alphanums = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        # print(f"Start state is {self.simulator.model.start_state}")
+        start_state_sets = self.simulator.model.track.progressive_start_states()
+        start_state_subdivision_size = number_of_episodes / len(start_state_sets)
+        self.simulator.model.record_length = int(start_state_subdivision_size)
+        current_division = 0
         for episode in range(number_of_episodes):
+            if episode+1 > start_state_subdivision_size * current_division:
+                print(f"On episode {episode}, switching to division {alphanums[current_division+1]}")
+                current_division += 1
+            self.simulator.model.start_state = random.choice(start_state_sets[current_division-1])
+
+            if episode >= number_of_episodes * (49750 / 50000) and self.simulator.model.track.t is None:
+                self.simulator.model.track.t = turtle.Turtle()
+                self.simulator.model.track.display_track_with_turtle()
+
             if episode > 0:
-                self.simulator.race_car = RaceCar(self.simulator.model.track.start_state())
+                self.simulator.race_car = RaceCar(self.simulator.model.start_state)
             self.previous_reward: int = 0
             current_state: State = self.simulator.race_car.state
             while current_state is not self.simulator.model.special_state:

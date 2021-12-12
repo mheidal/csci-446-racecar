@@ -9,7 +9,7 @@ from state import State
 
 import turtle
 
-scale_factor: float = 10
+scale_factor: float = 15
 
 
 class CellType(IntEnum):
@@ -27,14 +27,17 @@ class TransitionType(IntEnum):
 
 class Track:
 
-    def __init__(self, track_file: str = None, turt: turtle.Turtle = None):
+    def __init__(self, track_file: str = "L-track", *, turt: turtle.Turtle = None, progressive_start_states = False):
         self.start_states: List[State] = []
         self.finish_states: List[State] = []
-        if track_file is None:
-            self.parse_file("L-track.txt")
-        else:
-            self.parse_file(track_file)
-            self.track_name: str = track_file.split(".")[0]
+        self.track = self.parse_file(track_file)
+        self.track_file = track_file
+        if progressive_start_states:
+            self.start_states = self.progressive_start_states(1)
+        # else:
+        #     self.parse_file(track_file)
+        #     self.track_name: str = track_file.split(".")[0]
+
         self._str: str = ""
         self.t = turt
         if self.t is not None:
@@ -48,6 +51,53 @@ class Track:
             self.t.stamp()
             self.s.update()
         return start_state
+
+    def progressive_start_states(self) -> List[List[State]]:
+        alphanums = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        arr = np.full(self.track.shape, '#')
+        queue = []
+        for y, row in enumerate(self.track):
+            for x, cell in enumerate(row):
+                if cell == CellType.WALL:
+                    arr[y][x] = "."
+                elif cell == CellType.FINISH:
+                    arr[y][x] = "0"
+                    queue.append({'x': x, 'y': y})
+        while queue:
+            cell = queue.pop(0)
+            val = arr[cell['y']][cell['x']]
+            if val != "#" and val != ".":
+                for x_adj in [-1, 0, 1]:
+                    for y_adj in [-1, 0, 1]:
+                        if arr[cell['y'] + y_adj][cell['x'] + x_adj] == "#":
+                            arr[cell['y'] + y_adj][cell['x'] + x_adj] = alphanums[alphanums.index(val) + 1]
+                            queue.append({'x':cell['x'] + x_adj, 'y':cell['y'] + y_adj})
+        start_state_sets: List[List[State]] = []
+        for i in alphanums:
+            if i != '0':
+                set = []
+                for y, row in enumerate(arr):
+                    for x, cell in enumerate(row):
+                        if i == cell:
+                            set.append(State(x, y, 0, 0))
+                        #     for x_vel in range(-5, 6):
+                        #         for y_vel in range(-5, 6):
+                        #             set.append(State(x, y, x_vel, y_vel))
+                if set != []:
+                    start_state_sets.append(set)
+        string = "    "
+        for i in range(len(arr[0])):
+            string += alphanums[i] + " "
+        string += "\n"
+        for y, row in enumerate(arr):
+            string += alphanums[y] + " | "
+            for cell in row:
+                string += cell + " "
+            string += "\n"
+        print(f"Track is\n{string}")
+
+        return start_state_sets
+
 
     def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[Tuple[Tuple[int, int], List[LineSegment]]]:
         cells: List[Tuple[Tuple[int, int], List[LineSegment]]] = []
@@ -105,57 +155,59 @@ class Track:
                         if new_dist < old_dist:
                             closest_intersection = (new_dist, TransitionType.WIN)
 
-        if closest_intersection[1] == TransitionType.CRASH:
-            furthest_track_boundary: Tuple[float, Point] = None
-            driveable_cells = self.get_boundaries_of_type(CellType.TRACK, trajectory) + \
-                              self.get_boundaries_of_type(CellType.START, trajectory) + \
-                              self.get_boundaries_of_type(CellType.FINISH, trajectory)
-            for cell in driveable_cells:
-                boundaries = cell[1]
-                for line_segment in boundaries:
-                    if detect_if_intersect(trajectory, line_segment):
-                        intersection_point = find_intersection_point(line_segment, trajectory)
-                        if furthest_track_boundary is None and intersection_point != last_wall_cell_intersect:
-                            furthest_track_boundary = (
-                            euclid_dist(trajectory.p1, intersection_point), intersection_point)
-                        else:
-                            if furthest_track_boundary is not None:
-                                old_dist = furthest_track_boundary[0]
-                                new_dist = euclid_dist(trajectory.p1, intersection_point)
-                                if new_dist > old_dist and intersection_point != last_wall_cell_intersect:
-                                    furthest_track_boundary = (new_dist, intersection_point)
-
-            if furthest_track_boundary is None:
-                return TransitionType.CRASH, Point(state.x_pos, state.y_pos)
-            else:
-                for cell in driveable_cells:
-                    x, y = cell[0]
-                    matches = 0
-                    boundaries = cell[1]
-                    for line_segment in boundaries:
-                        if ((line_segment.p1.x >= furthest_track_boundary[
-                            1].x >= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[
-                                 1].y and line_segment.p2.y == furthest_track_boundary[1].y)
-                            or (line_segment.p1.x <= furthest_track_boundary[
-                                    1].x <= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[
-                                    1].y and line_segment.p2.y == furthest_track_boundary[1].y)
-                            or (line_segment.p1.y <= furthest_track_boundary[
-                                    1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[
-                                    1].x and line_segment.p2.x == furthest_track_boundary[1].x)
-                            or (line_segment.p1.y <= furthest_track_boundary[
-                                    1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[
-                                    1].x and line_segment.p2.x == furthest_track_boundary[1].x)) \
-                                or ((
-                                            line_segment.p1.x >= last_wall_cell_intersect.x >= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
-                                    or (
-                                            line_segment.p1.x <= last_wall_cell_intersect.x <= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
-                                    or (
-                                            line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)
-                                    or (
-                                            line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)):
-                            matches += 1
-                    if matches > 1:
-                        return closest_intersection[1], Point(x, y)
+        # I'm just gonna comment all this out and simplify how crashing works with crash type "stop". Crashing will
+        # now just put you back where you last were with your velocity dead.
+        # if closest_intersection[1] == TransitionType.CRASH:
+        #     furthest_track_boundary: Tuple[float, Point] = None
+        #     driveable_cells = self.get_boundaries_of_type(CellType.TRACK, trajectory) + \
+        #                       self.get_boundaries_of_type(CellType.START, trajectory) + \
+        #                       self.get_boundaries_of_type(CellType.FINISH, trajectory)
+        #     for cell in driveable_cells:
+        #         boundaries = cell[1]
+        #         for line_segment in boundaries:
+        #             if detect_if_intersect(trajectory, line_segment):
+        #                 intersection_point = find_intersection_point(line_segment, trajectory)
+        #                 if furthest_track_boundary is None and intersection_point != last_wall_cell_intersect:
+        #                     furthest_track_boundary = (
+        #                     euclid_dist(trajectory.p1, intersection_point), intersection_point)
+        #                 else:
+        #                     if furthest_track_boundary is not None:
+        #                         old_dist = furthest_track_boundary[0]
+        #                         new_dist = euclid_dist(trajectory.p1, intersection_point)
+        #                         if new_dist > old_dist and intersection_point != last_wall_cell_intersect:
+        #                             furthest_track_boundary = (new_dist, intersection_point)
+        #
+        #     if furthest_track_boundary is None:
+        #         return TransitionType.CRASH, Point(state.x_pos, state.y_pos)
+        #     else:
+        #         for cell in driveable_cells:
+        #             x, y = cell[0]
+        #             matches = 0
+        #             boundaries = cell[1]
+        #             for line_segment in boundaries:
+        #                 if ((line_segment.p1.x >= furthest_track_boundary[
+        #                     1].x >= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[
+        #                          1].y and line_segment.p2.y == furthest_track_boundary[1].y)
+        #                     or (line_segment.p1.x <= furthest_track_boundary[
+        #                             1].x <= line_segment.p2.x and line_segment.p1.y == furthest_track_boundary[
+        #                             1].y and line_segment.p2.y == furthest_track_boundary[1].y)
+        #                     or (line_segment.p1.y <= furthest_track_boundary[
+        #                             1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[
+        #                             1].x and line_segment.p2.x == furthest_track_boundary[1].x)
+        #                     or (line_segment.p1.y <= furthest_track_boundary[
+        #                             1].y <= line_segment.p2.y and line_segment.p1.x == furthest_track_boundary[
+        #                             1].x and line_segment.p2.x == furthest_track_boundary[1].x)) \
+        #                         or ((
+        #                                     line_segment.p1.x >= last_wall_cell_intersect.x >= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
+        #                             or (
+        #                                     line_segment.p1.x <= last_wall_cell_intersect.x <= line_segment.p2.x and line_segment.p1.y == last_wall_cell_intersect.y and line_segment.p2.y == last_wall_cell_intersect.y)
+        #                             or (
+        #                                     line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)
+        #                             or (
+        #                                     line_segment.p1.y <= last_wall_cell_intersect.y <= line_segment.p2.y and line_segment.p1.x == last_wall_cell_intersect.x and line_segment.p2.x == last_wall_cell_intersect.x)):
+        #                     matches += 1
+        #             if matches > 1:
+        #                 return closest_intersection[1], Point(x, y)
 
         return closest_intersection[1]
 
@@ -183,11 +235,11 @@ class Track:
     #                 return True
     #     return False
 
-    def parse_file(self, track_file: str) -> None:
-        filename: str = "tracks/" + track_file
+    def parse_file(self, track_file: str):
+        filename: str = "tracks/" + track_file + ".txt"
         f = open(filename)
         x, y = f.readline().strip('\n').split(',')
-        self.track = np.zeros((int(x), int(y)))
+        track = np.zeros((int(x), int(y)))
         line = f.readline()
         i: int = 0  # this is y
         j: int = 0  # this is x
@@ -204,9 +256,10 @@ class Track:
                     self.finish_states.append(State(j, i, 0, 0))
                 else:
                     type = CellType(3)
-                self.track[i][j] = type
+                track[i][j] = type
             i += 1
             line = f.readline()
+        return track
 
     def __str__(self) -> str:
         if self._str == "":
@@ -293,7 +346,9 @@ class Track:
 
 
 def test():
-    track = Track("L-track.txt", True)
+    Track("L-track").progressive_start_states()
+    Track("R-track").progressive_start_states()
+    Track("O-track").progressive_start_states()
 
 
 if __name__ == "__main__":
