@@ -12,9 +12,8 @@ from track import Track
 
 class Simulator:
 
-    def __init__(self, *, activate_turtle: bool = False, ) -> None:
-        self.model: Model = Model(Track(track_file="R-track")) if not activate_turtle \
-            else Model(Track("O-track", turt=turtle.Turtle()))
+    def __init__(self, *, activate_turtle: bool = False, track: str = "L-track") -> None:
+        self.model: Model = Model(Track(track_file=track)) if not activate_turtle else Model(Track(track_file=track, turt=turtle.Turtle()))
         self._str = ""
         start_state: State = self.model.track.start_state()
         self.race_car: RaceCar = RaceCar(start_state)
