@@ -179,6 +179,9 @@ class Model:
     def reward(self, state: State) -> int:
         return 0 if state == self.special_state else -1
 
+    def average_transition(self) -> float:
+        return self.average_transitions / self.record_length
+
 
 def test_model():
     turt: turtle.Turtle = turtle.Turtle()
