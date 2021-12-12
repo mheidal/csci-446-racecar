@@ -17,7 +17,7 @@ def main():
 
     vi: ValueIterator = ValueIterator()
     x = vi.value_iteration()
-    print('done')
+    print(x)
 
 
 
