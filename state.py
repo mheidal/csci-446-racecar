@@ -1,5 +1,3 @@
-
-
 class State:
     def __init__(self, x_pos, y_pos, x_vel, y_vel):
         self.x_pos = x_pos

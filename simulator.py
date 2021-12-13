@@ -1,20 +1,14 @@
-import random
 import turtle
-from typing import Tuple
-
-from race_car import RaceCar
-from track import Track, CellType
 from model import Model
 from state import State
 from race_car import RaceCar
 from track import Track
-
+from enums import CellType
 
 class Simulator:
 
-    def __init__(self, *, activate_turtle: bool = False, ) -> None:
-        self.model: Model = Model(Track(track_file="I-track")) if not activate_turtle \
-            else Model(Track("I-track", turt=turtle.Turtle()))
+    def __init__(self, *, activate_turtle: bool = False, track: str = "L-track") -> None:
+        self.model: Model = Model(Track(track_file=track)) if not activate_turtle else Model(Track(track_file=track, turt=turtle.Turtle()))
         self._str = ""
         start_state: State = self.model.track.start_state()
         self.race_car: RaceCar = RaceCar(start_state)

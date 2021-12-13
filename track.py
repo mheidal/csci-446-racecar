@@ -1,29 +1,14 @@
 import random
 from typing import List, Tuple, Union
-from enum import IntEnum
 import numpy as np
 
-from race_car import RaceCar
+
 from geometry import Point, LineSegment, detect_if_intersect, find_intersection_point, euclid_dist
 from state import State
 
 import turtle
 
 scale_factor: float = 15
-
-
-class CellType(IntEnum):
-    WALL = 0
-    START = 1
-    FINISH = 2
-    TRACK = 3
-
-
-class TransitionType(IntEnum):
-    CRASH = 0
-    WIN = 1
-    MOVE = 2
-
 
 class Track:
 
@@ -97,7 +82,6 @@ class Track:
         print(f"Track is\n{string}")
 
         return start_state_sets
-
 
     def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[Tuple[Tuple[int, int], List[LineSegment]]]:
         cells: List[Tuple[Tuple[int, int], List[LineSegment]]] = []
