@@ -38,7 +38,7 @@ class QLearner:
                                         (x_acceleration, y_acceleration))] = -1
         return
 
-    def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1) -> None:
+    def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1) -> List[int]:
         # init all Q(s, a) arbitrarily
         # for all episodes do the following
         #   initialize s
@@ -76,6 +76,9 @@ class QLearner:
         # temp 2
         # self.initial_temperature = number_of_episodes / 2 if number_of_episodes % 2 == 0 else (number_of_episodes - 1) / 2
         # self.temperature = self.initial_temperature
+
+        results: List[int] = []
+
         for episode in range(number_of_episodes):
 
             if episode+1 > start_state_subdivision_size * current_division * current_division_update_multiplier:
@@ -89,8 +92,12 @@ class QLearner:
 
             if episode > 0:
                 self.simulator.race_car = RaceCar(self.simulator.model.start_state)
+
             self.previous_reward: int = 0
             current_state: State = self.simulator.race_car.state
+
+            num_actions: int = 0
+
             while current_state is not self.simulator.model.special_state:
                 alpha: float = 1
 
@@ -101,6 +108,9 @@ class QLearner:
                 accelerations: List[Tuple[int, int]] = boltzmann[0]
                 acceleration_probability_distribution: List[float] = boltzmann[1]
                 a_x, a_y = random.choices(accelerations, weights=acceleration_probability_distribution)[0]
+
+                if episode >= (number_of_episodes - self.simulator.model.record_length):
+                    num_actions += 1
 
                 # apply action a
                 self.simulator.act(a_x, a_y)
@@ -120,6 +130,9 @@ class QLearner:
 
                 # set s <= s' and
                 current_state = new_state
+            if episode >= (number_of_episodes - self.simulator.model.record_length):
+                results.append(num_actions)
+        return results
 
     def boltzmann_distribution(self, state: State) -> Tuple[List[Tuple[int, int]], List[Any]]:
         # this should be the probability distributions for the possible actions at this state
@@ -180,5 +193,5 @@ class QLearner:
 
 if __name__ == "__main__":
     q_learner: QLearner = QLearner()
-    q_learner.q_learn(number_of_episodes=10000, viewable_episodes=100)
+    q_learner.q_learn(number_of_episodes=100, viewable_episodes=1)
     pass
