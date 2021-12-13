@@ -38,7 +38,7 @@ class QLearner:
                                         (x_acceleration, y_acceleration))] = -1
         return
 
-    def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1, alpha_rate: float = 1) -> List[int]:
+    def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1, alpha_rate: float = 0.9952) -> List[int]:
         # init all Q(s, a) arbitrarily
         # for all episodes do the following
         #   initialize s

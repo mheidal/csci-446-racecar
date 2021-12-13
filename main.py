@@ -17,10 +17,12 @@ class MultiProcessedExperiments:
         self.queue: Queue = Queue()
         self.output: float = 0.0
         self.tracks: List = ["L-track", "O-track", "R-track"]
-        self.episodes: List[int] = [100, 250, 1000, 2500, 5000, 10000, 15000, 20000, 25000, 35000]
-        # self.tracks: List = ["L-track"]
+        # self.episodes: List[int] = [300, 750, 1000, 2500, 5000, 10000, 20000, 30000, 25000, 50000]
+        self.episodes: List[int] = [15000, 40000, 75000, 100000]
+        # self.episodes: List[int] = [35000]
+        # self.tracks: List = ["R-track"]
         self.experiments_per_track: int = 10
-        self.available_threads: int = 20
+        self.available_threads: int = 20  # actually 24 but 20 allows for other tasks such as os, temp monitoring, etc
 
     def experiments(self) -> None:
         for track in self.tracks:
@@ -33,6 +35,12 @@ class MultiProcessedExperiments:
                                                          name=f"experiment_process_restart_{track}_{i}"))
                 processes.append(multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, False,),
                                                          name=f"experiment_process_stop_{track}_{i}"))
+                processes.append(
+                    multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, True,),
+                                            name=f"experiment_process_restart_{track}_{i}"))
+                processes.append(
+                    multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, False,),
+                                            name=f"experiment_process_stop_{track}_{i}"))
 
             for process in processes:
                 process.start()
