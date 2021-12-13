@@ -1,6 +1,7 @@
 import random
 from typing import List, Tuple, Union
 import numpy as np
+from enums import CellType, TransitionType
 
 
 from geometry import Point, LineSegment, detect_if_intersect, find_intersection_point, euclid_dist

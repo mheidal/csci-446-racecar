@@ -217,6 +217,11 @@ class ValueIterator:
 
     # def update_q(self) -> Dict[Tuple[int, int], int]:
     #     pass
+    def execute_policy(self) -> None:
+        pass
+
+    def update_q(self) -> Dict[Tuple[int, int], int]:
+        pass
 
 
 
