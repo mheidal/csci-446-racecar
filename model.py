@@ -14,7 +14,7 @@ from enums import CrashType, TransitionType, CellType
 
 class Model:
 
-    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.RESTART) -> None:
         self.num_transitions = 0
         self.num_wins = 0
         self.average_transitions = 0

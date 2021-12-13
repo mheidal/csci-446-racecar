@@ -80,7 +80,7 @@ class Track:
             for cell in row:
                 string += cell + " "
             string += "\n"
-        print(f"Track is\n{string}")
+        # print(f"Track is\n{string}")
 
         return start_state_sets
 
