@@ -12,11 +12,11 @@ from race_car import RaceCar
 
 class QLearner:
 
-    def __init__(self, *, turtle_bool: bool = False, track: str = "L-track") -> None:
-        self.simulator: Simulator = Simulator(activate_turtle=turtle_bool, track=track)
+    def __init__(self, *, turtle_bool: bool = False, track: str = "L-track", gamma: float = 1, crash_type_restart: bool = True) -> None:
+        self.simulator: Simulator = Simulator(activate_turtle=turtle_bool, track=track, crash_type_restart=crash_type_restart)
         self.q: Dict[Tuple[State, Tuple[
             int, int]]] = {}  # make a dict of w/ key of Tuple(state, action), value: Reward. Implement the comparable and hashable methods to pass in State as an key
-        self.gamma: float = 1
+        self.gamma: float = gamma
         self.previous_reward: int = 0
         self.initial_temperature: int = 1
         self.temperature: int = 1
@@ -38,7 +38,7 @@ class QLearner:
                                         (x_acceleration, y_acceleration))] = -1
         return
 
-    def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1) -> List[int]:
+    def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1, alpha_rate: float = 1) -> List[int]:
         # init all Q(s, a) arbitrarily
         # for all episodes do the following
         #   initialize s
@@ -83,7 +83,7 @@ class QLearner:
 
             if episode+1 > start_state_subdivision_size * current_division * current_division_update_multiplier:
                 current_division += 1 * current_division_update_multiplier
-                print(f"On episode {episode}, switching to division {alphanums[current_division]}")
+                # print(f"On episode {episode}, switching to division {alphanums[current_division]}")
             self.simulator.model.start_state = random.choice(start_state_sets[current_division-1])
 
             if episode >= number_of_episodes * ((number_of_episodes - viewable_episodes) / number_of_episodes) and self.simulator.model.track.t is None:
@@ -99,7 +99,7 @@ class QLearner:
             num_actions: int = 0
 
             while current_state is not self.simulator.model.special_state:
-                alpha: float = 1
+                alpha: float = alpha_rate
 
                 # choose a derived from Q
                 a_x: int

@@ -16,7 +16,7 @@ class CrashType(IntEnum):
 
 class Model:
 
-    def __init__(self, track: Track, crash_type: CrashType = CrashType.STOP) -> None:
+    def __init__(self, track: Track, crash_type: CrashType = CrashType.RESTART) -> None:
         self.num_transitions = 0
         self.num_wins = 0
         self.average_transitions = 0
@@ -29,9 +29,9 @@ class Model:
         self.track_state_space = self.initialize_track_state_space()
         self.start_state = track.start_state()  # THE STATE THE CAR STARTS IN
         self.special_state = State(-1, -1, 0, 0)  # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
-        print("setting up trans map")
+        # print("setting up trans map")
         # self.transition_map = self.init_transition_map()
-        print("finished setting up trans map")
+        # print("finished setting up trans map")
         # self.action_space:
 
     def initialize_state_space(self):
@@ -87,7 +87,7 @@ class Model:
 
     def read_transition_map_from_file(self) -> Dict:
         table = {}
-        with open("tracks/" + self.track.track_file + "-transition-map.txt", 'r') as file:
+        with open("tracks/" + self.track.track_file + "-transition-map-restart.txt", 'r') as file:
             line = file.readline()
             while line:
                 key, val0, val1 = line.strip("\n").split(":")

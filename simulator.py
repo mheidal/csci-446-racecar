@@ -4,7 +4,7 @@ from typing import Tuple
 
 from race_car import RaceCar
 from track import Track, CellType
-from model import Model
+from model import Model, CrashType
 from state import State
 from race_car import RaceCar
 from track import Track
@@ -12,8 +12,8 @@ from track import Track
 
 class Simulator:
 
-    def __init__(self, *, activate_turtle: bool = False, track: str = "L-track") -> None:
-        self.model: Model = Model(Track(track_file=track)) if not activate_turtle else Model(Track(track_file=track, turt=turtle.Turtle()))
+    def __init__(self, *, activate_turtle: bool = False, track: str = "L-track", crash_type_restart: bool = True) -> None:
+        self.model: Model = Model(Track(track_file=track), crash_type=(CrashType.RESTART if crash_type_restart else CrashType.STOP)) if not activate_turtle else Model(Track(track_file=track, turt=turtle.Turtle()), crash_type=(CrashType.RESTART if crash_type_restart else CrashType.STOP))
         self._str = ""
         start_state: State = self.model.track.start_state()
         self.race_car: RaceCar = RaceCar(start_state)

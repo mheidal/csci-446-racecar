@@ -16,9 +16,11 @@ class MultiProcessedExperiments:
         self.lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
         self.output: float = 0.0
-        # self.tracks: List = ["L-track", "O-track", "R-track"]
-        self.tracks: List = ["R-track"]
-        self.experiments_per_track: int = 12
+        self.tracks: List = ["L-track", "O-track", "R-track"]
+        self.episodes: List[int] = [100, 250, 1000, 2500, 5000, 10000, 15000, 20000, 25000, 35000]
+        # self.tracks: List = ["L-track"]
+        self.experiments_per_track: int = 10
+        self.available_threads: int = 20
 
     def experiments(self) -> None:
         for track in self.tracks:
@@ -26,9 +28,12 @@ class MultiProcessedExperiments:
             self.lock.acquire()
             print(f"Track: {track}")
             self.lock.release()
-            for i in range(0, self.experiments_per_track):
-                processes.append(multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i,),
-                                                         name=f"experiment_process_{track}_{i}"))
+            for i, episode in enumerate(self.episodes):
+                processes.append(multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, True,),
+                                                         name=f"experiment_process_restart_{track}_{i}"))
+                processes.append(multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, False,),
+                                                         name=f"experiment_process_stop_{track}_{i}"))
+
             for process in processes:
                 process.start()
             self.lock.acquire()
@@ -43,12 +48,64 @@ class MultiProcessedExperiments:
             self.lock.release()
         return
 
-    def _run_experiment(self, track: str, process_number: int) -> None:
+    def range_alpha(self) -> None:
+        for track in self.tracks:
+            processes: List[Process] = []
+            self.lock.acquire()
+            print(f"Track: {track}")
+            self.lock.release()
+            alpha: float = 1
+            episodes: int = 25000
+            decrement: float = 0.1/(self.available_threads + 1)
+            for i in range(0, self.available_threads):
+                processes.append(multiprocessing.Process(target=self._run_alpha_experiment, args=(deepcopy(track), i, episodes, alpha,),
+                                                         name=f"alpha_experiment_process_{track}_{i}_alpha_{alpha}"))
+                alpha -= decrement
+            for process in processes:
+                process.start()
+            self.lock.acquire()
+            print(f"Processes 0-{self.available_threads - 1} started for track: {track}")
+            self.lock.release()
+            for process in processes:
+                self.output += self.queue.get()
+                process.join()
+
+            self.lock.acquire()
+            print(f"Processes 0-{self.available_threads - 1} joined for track: {track}\nAverage actions taken: {self.output/self.available_threads}")
+            self.lock.release()
+        return
+
+    def range_gamma(self) -> None:
+        for track in self.tracks:
+            processes: List[Process] = []
+            self.lock.acquire()
+            print(f"Track: {track}")
+            self.lock.release()
+            gamma: float = 1
+            episodes: int = 25000
+            decrement: float = 0.2 / (self.available_threads + 1)
+            for i in range(0, self.available_threads):
+                processes.append(multiprocessing.Process(target=self._run_gamma_experiment, args=(deepcopy(track), i, episodes, gamma,),
+                                                         name=f"gamma_experiment_process_{track}_{i}_gamma_{gamma}"))
+                gamma -= decrement
+            for process in processes:
+                process.start()
+            self.lock.acquire()
+            print(f"Processes 0-{self.available_threads - 1} started for track: {track}")
+            self.lock.release()
+            for process in processes:
+                self.output += self.queue.get()
+                process.join()
+
+            self.lock.acquire()
+            print(f"Processes 0-{self.available_threads - 1} joined for track: {track}\nAverage actions taken: {self.output/self.available_threads}")
+            self.lock.release()
+        return
+
+    def _run_experiment(self, track: str, process_number: int, episodes: int = 25000, crash_type_restart: bool = True) -> None:
         start_time = datetime.now()
-        self.lock.acquire()
-        q_learn: QLearner = QLearner(track=track)
-        self.lock.release()
-        results: List[int] = q_learn.q_learn(number_of_episodes=25000, viewable_episodes=5)
+        q_learn: QLearner = QLearner(track=track, crash_type_restart=crash_type_restart)
+        results: List[int] = q_learn.q_learn(number_of_episodes=episodes, viewable_episodes=1)
         end_time = datetime.now()
 
         sum: float = 0
@@ -58,9 +115,49 @@ class MultiProcessedExperiments:
 
         self.lock.acquire()
         self.queue.put(sum)
-        print(f"Finished track {track} on process {process_number} in {end_time - start_time}\nAverage actions taken: {sum}\n")
+        print(f"Finished track {track}-{'restart' if crash_type_restart else 'stop'} on process {process_number} in {end_time - start_time}\nEpisodes: {episodes}\nAverage actions taken: {sum}\n")
         self.lock.release()
         return
+
+    def _run_alpha_experiment(self, track: str, process_number: int, episodes: int, alpha: float) -> None:
+        start_time = datetime.now()
+        self.lock.acquire()
+        q_learn: QLearner = QLearner(track=track)
+        self.lock.release()
+        results: List[int] = q_learn.q_learn(number_of_episodes=episodes, viewable_episodes=5, alpha_rate=alpha)
+        end_time = datetime.now()
+
+        sum: float = 0
+        for result in results:
+            sum += result
+        sum = sum / len(results)
+
+        self.lock.acquire()
+        self.queue.put(sum)
+        print(f"Finished track {track} on process {process_number} in {end_time - start_time}\nAlpha: {alpha}\nAverage actions taken: {sum}\n")
+        self.lock.release()
+        return
+
+    def _run_gamma_experiment(self, track: str, process_number: int, episodes: int, gamma: float) -> None:
+        start_time = datetime.now()
+        self.lock.acquire()
+        q_learn: QLearner = QLearner(track=track, gamma=gamma)
+        self.lock.release()
+        results: List[int] = q_learn.q_learn(number_of_episodes=episodes, viewable_episodes=5)
+        end_time = datetime.now()
+
+        sum: float = 0
+        for result in results:
+            sum += result
+        sum = sum / len(results)
+
+        self.lock.acquire()
+        self.queue.put(sum)
+        print(f"Finished track {track} on process {process_number} in {end_time - start_time}\nGamma: {gamma}\nAverage actions taken: {sum}\n")
+        self.lock.release()
+        return
+
+
 
 
 def main():
@@ -84,3 +181,5 @@ if __name__ == "__main__":
     # main()
     mpe: MultiProcessedExperiments = MultiProcessedExperiments()
     mpe.experiments()
+    # mpe.range_alpha()
+    # mpe.range_gamma()
