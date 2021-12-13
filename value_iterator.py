@@ -44,6 +44,8 @@ class ValueIterator:
 
         # initalizes the transition dictionary because its quicker to look at the transistion dictionary
         # than call transition many times in value iteration
+    def init_transition_dict(self):
+        rows, columns = self.simulator.model.track.track.shape
         for x_position in range(columns-1):
             for y_position in range(rows-1):
                 for x_velocity in range(-5, 6):
