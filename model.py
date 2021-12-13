@@ -56,7 +56,10 @@ class Model:
         return state_space
 
     def init_transition_map(self):
-        if exists("tracks/" + self.track.track_file + "-transition-map.txt"):
+        transition_file_name = "tracks/" + self.track.track_file + "-transition-map"
+        if self.track.track_file == "R-track":
+            transition_file_name += "-" + self.crash_type.name.lower()
+        if exists(f"{transition_file_name}.txt"):
             return self.read_transition_map_from_file()
         else:
             table = {}
