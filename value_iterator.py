@@ -142,14 +142,6 @@ class ValueIterator:
                 # self.model.reward(state)
                 # gammaV*(s')
 
-
-
-
-
-
-
-
-
     def execute_policy(self) -> None:
         pass
 
