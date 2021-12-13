@@ -4,8 +4,7 @@ from datetime import datetime
 from multiprocessing import Process, Queue
 from typing import List
 
-from track import Track
-from simulator import Simulator
+
 from q_learner import QLearner
 from value_iterator import ValueIterator
 
@@ -180,9 +179,8 @@ def main():
     # simulator.manual_control()
 
     vi: ValueIterator = ValueIterator()
-    print(vi.model.track)
-    x = vi.value_iteration()
-    print(x)
+    v = vi.value_iteration()
+    print(v)
 
 
 if __name__ == "__main__":
