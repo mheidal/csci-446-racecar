@@ -5,9 +5,13 @@ from multiprocessing import Process, Queue
 from typing import List
 
 
+from model import Model
+from track import Track
+from race_car import RaceCar
+from state import State
 from q_learner import QLearner
 from value_iterator import ValueIterator
-
+from turtle import Turtle
 
 class MultiProcessedExperiments:
 
@@ -60,6 +64,14 @@ class MultiProcessedExperiments:
         self.lock.release()
         return
 
+def execute_policy(best_action_by_state, track_file: str):
+    model = Model(Track(track_file=track_file, turt=Turtle()))
+    race_car = RaceCar(model.start_state)
+    while race_car.state != model.special_state:
+        action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,
+                                       race_car.state.x_vel, race_car.state.y_vel)]
+        race_car.state = model.transition(race_car.state, action[0], action[1])
+    print('yahoo')
 
 def main():
     # track: Track = Track()
@@ -71,11 +83,10 @@ def main():
     # print("w = Up, a = Left, s = Down, d = Right ")
     # #call simulator
     # simulator.manual_control()
-
-    vi: ValueIterator = ValueIterator()
-    v = vi.value_iteration()
-    print(v)
-
+    track_file = "L-track"
+    vi: ValueIterator = ValueIterator(track_file=track_file)
+    best_action_by_state = vi.value_iteration()
+    execute_policy(best_action_by_state, track_file)
 
 if __name__ == "__main__":
     main()
