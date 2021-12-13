@@ -16,7 +16,8 @@ class MultiProcessedExperiments:
         self.lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
         self.output: float = 0.0
-        self.tracks: List = ["L-track", "O-track", "R-track"]
+        # self.tracks: List = ["L-track", "O-track", "R-track"]
+        self.tracks: List = ["R-track"]
         self.experiments_per_track: int = 12
 
     def experiments(self) -> None:

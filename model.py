@@ -30,7 +30,7 @@ class Model:
         self.start_state = track.start_state()  # THE STATE THE CAR STARTS IN
         self.special_state = State(-1, -1, 0, 0)  # A SPECIAL STATE THAT MARKS THAT THE CAR IS DONE
         print("setting up trans map")
-        self.transition_map = self.init_transition_map()
+        # self.transition_map = self.init_transition_map()
         print("finished setting up trans map")
         # self.action_space:
 
