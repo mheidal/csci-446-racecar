@@ -1,11 +1,9 @@
 from copy import deepcopy
 
-from track import CellType, Track
+from track import Track
 from typing import Dict, Tuple, List
-import numpy as np
 from model import Model
-from simulator import Simulator
-
+from enums import CellType
 
 class ValueIterator:
 

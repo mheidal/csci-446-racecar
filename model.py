@@ -1,17 +1,15 @@
 import turtle
 from typing import List, Dict, Tuple
-from enum import IntEnum
-from track import Track, TransitionType, CellType
-from state import State
-from race_car import RaceCar
 from random import random
-import json
 from os.path import exists
 
 
-class CrashType(IntEnum):
-    RESTART = 0,
-    STOP = 1
+from track import Track
+from state import State
+from race_car import RaceCar
+from enums import CrashType, TransitionType, CellType
+
+
 
 
 class Model:
@@ -75,7 +73,10 @@ class Model:
         return table
 
     def write_transition_map_to_file(self, table: Dict):
-        with open("tracks/" + self.track.track_file + "-transition-map.txt", 'w') as file:
+        transition_file_name = "tracks/" + self.track.track_file + "-transition-map"
+        if self.track.track_file == "R-track":
+            transition_file_name += "-" + self.crash_type.name.lower()
+        with open(f"{transition_file_name}.txt", 'w') as file:
             for key, value in table.items():
                 init_state:State = key[0]
                 x_acc: int = key[1]
@@ -86,8 +87,11 @@ class Model:
         return
 
     def read_transition_map_from_file(self) -> Dict:
+        transition_file_name = "tracks/" + self.track.track_file + "-transition-map"
+        if self.track.track_file == "R-track":
+            transition_file_name += "-" + self.crash_type.name.lower()
         table = {}
-        with open("tracks/" + self.track.track_file + "-transition-map.txt", 'r') as file:
+        with open(f"{transition_file_name}.txt", 'r') as file:
             line = file.readline()
             while line:
                 key, val0, val1 = line.strip("\n").split(":")
@@ -101,6 +105,7 @@ class Model:
                 final_state_1 = State(int(final_1_x_pos), int(final_1_y_pos), int(final_1_x_vel), int(final_1_y_vel))
                 table[(init_state, int(x_acc), int(y_acc))] = ((float(prob_0), final_state_0), (float(prob_1), final_state_1))
                 line = file.readline()
+
         return table
 
     def report_progress_for_q_learn(self):

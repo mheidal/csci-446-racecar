@@ -1,10 +1,9 @@
 import math
-import operator
 import random
 from typing import Tuple, List, Dict, Any
 import turtle
 
-from track import CellType
+from enums import CellType
 from simulator import Simulator
 from state import State
 from race_car import RaceCar

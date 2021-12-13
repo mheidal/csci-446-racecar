@@ -4,8 +4,7 @@ from datetime import datetime
 from multiprocessing import Process, Queue
 from typing import List
 
-from track import Track
-from simulator import Simulator
+
 from q_learner import QLearner
 from value_iterator import ValueIterator
 
@@ -80,6 +79,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    mpe: MultiProcessedExperiments = MultiProcessedExperiments()
-    mpe.experiments()
+    main()
+    # mpe: MultiProcessedExperiments = MultiProcessedExperiments()
+    # mpe.experiments()

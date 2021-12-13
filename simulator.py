@@ -1,14 +1,9 @@
-import random
 import turtle
-from typing import Tuple
-
-from race_car import RaceCar
-from track import Track, CellType
 from model import Model
 from state import State
 from race_car import RaceCar
 from track import Track
-
+from enums import CellType
 
 class Simulator:
 
