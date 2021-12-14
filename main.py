@@ -4,7 +4,6 @@ from datetime import datetime
 from multiprocessing import Process, Queue
 from typing import List
 
-
 from model import Model
 from track import Track
 from race_car import RaceCar
@@ -12,6 +11,7 @@ from state import State
 from q_learner import QLearner
 from value_iterator import ValueIterator
 from turtle import Turtle
+
 
 class QLearnerMultiProcessedExperiments:
     """
@@ -37,10 +37,12 @@ class QLearnerMultiProcessedExperiments:
             print(f"Track: {track}")
             self.lock.release()
             for i, episode in enumerate(self.episodes):
-                processes.append(multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, True,),
-                                                         name=f"experiment_process_restart_{track}_{i}"))
-                processes.append(multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, False,),
-                                                         name=f"experiment_process_stop_{track}_{i}"))
+                processes.append(
+                    multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, True,),
+                                            name=f"experiment_process_restart_{track}_{i}"))
+                processes.append(
+                    multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, False,),
+                                            name=f"experiment_process_stop_{track}_{i}"))
                 processes.append(
                     multiprocessing.Process(target=self._run_experiment, args=(deepcopy(track), i, episode, True,),
                                             name=f"experiment_process_restart_{track}_{i}"))
@@ -58,7 +60,8 @@ class QLearnerMultiProcessedExperiments:
                 process.join()
 
             self.lock.acquire()
-            print(f"Processes 0-{self.experiments_per_track - 1} joined for track: {track}\nAverage actions taken: {self.output/self.experiments_per_track}")
+            print(
+                f"Processes 0-{self.experiments_per_track - 1} joined for track: {track}\nAverage actions taken: {self.output / self.experiments_per_track}")
             self.lock.release()
         return
 
@@ -70,9 +73,10 @@ class QLearnerMultiProcessedExperiments:
             self.lock.release()
             alpha: float = 1
             episodes: int = 25000
-            decrement: float = 0.1/(self.available_threads + 1)
+            decrement: float = 0.1 / (self.available_threads + 1)
             for i in range(0, self.available_threads):
-                processes.append(multiprocessing.Process(target=self._run_alpha_experiment, args=(deepcopy(track), i, episodes, alpha,),
+                processes.append(multiprocessing.Process(target=self._run_alpha_experiment,
+                                                         args=(deepcopy(track), i, episodes, alpha,),
                                                          name=f"alpha_experiment_process_{track}_{i}_alpha_{alpha}"))
                 alpha -= decrement
             for process in processes:
@@ -85,7 +89,8 @@ class QLearnerMultiProcessedExperiments:
                 process.join()
 
             self.lock.acquire()
-            print(f"Processes 0-{self.available_threads - 1} joined for track: {track}\nAverage actions taken: {self.output/self.available_threads}")
+            print(
+                f"Processes 0-{self.available_threads - 1} joined for track: {track}\nAverage actions taken: {self.output / self.available_threads}")
             self.lock.release()
         return
 
@@ -99,7 +104,8 @@ class QLearnerMultiProcessedExperiments:
             episodes: int = 25000
             decrement: float = 0.2 / (self.available_threads + 1)
             for i in range(0, self.available_threads):
-                processes.append(multiprocessing.Process(target=self._run_gamma_experiment, args=(deepcopy(track), i, episodes, gamma,),
+                processes.append(multiprocessing.Process(target=self._run_gamma_experiment,
+                                                         args=(deepcopy(track), i, episodes, gamma,),
                                                          name=f"gamma_experiment_process_{track}_{i}_gamma_{gamma}"))
                 gamma -= decrement
             for process in processes:
@@ -112,11 +118,13 @@ class QLearnerMultiProcessedExperiments:
                 process.join()
 
             self.lock.acquire()
-            print(f"Processes 0-{self.available_threads - 1} joined for track: {track}\nAverage actions taken: {self.output/self.available_threads}")
+            print(
+                f"Processes 0-{self.available_threads - 1} joined for track: {track}\nAverage actions taken: {self.output / self.available_threads}")
             self.lock.release()
         return
 
-    def _run_experiment(self, track: str, process_number: int, episodes: int = 25000, crash_type_restart: bool = True) -> None:
+    def _run_experiment(self, track: str, process_number: int, episodes: int = 25000,
+                        crash_type_restart: bool = True) -> None:
         start_time = datetime.now()
         q_learn: QLearner = QLearner(track=track, crash_type_restart=crash_type_restart)
         results: List[int] = q_learn.q_learn(number_of_episodes=episodes, viewable_episodes=1)
@@ -129,7 +137,8 @@ class QLearnerMultiProcessedExperiments:
 
         self.lock.acquire()
         self.queue.put(sum)
-        print(f"Finished track {track}-{'restart' if crash_type_restart else 'stop'} on process {process_number} in {end_time - start_time}\nEpisodes: {episodes}\nAverage actions taken: {sum}\n")
+        print(
+            f"Finished track {track}-{'restart' if crash_type_restart else 'stop'} on process {process_number} in {end_time - start_time}\nEpisodes: {episodes}\nAverage actions taken: {sum}\n")
         self.lock.release()
         return
 
@@ -148,7 +157,8 @@ class QLearnerMultiProcessedExperiments:
 
         self.lock.acquire()
         self.queue.put(sum)
-        print(f"Finished track {track} on process {process_number} in {end_time - start_time}\nAlpha: {alpha}\nAverage actions taken: {sum}\n")
+        print(
+            f"Finished track {track} on process {process_number} in {end_time - start_time}\nAlpha: {alpha}\nAverage actions taken: {sum}\n")
         self.lock.release()
         return
 
@@ -167,9 +177,11 @@ class QLearnerMultiProcessedExperiments:
 
         self.lock.acquire()
         self.queue.put(sum)
-        print(f"Finished track {track} on process {process_number} in {end_time - start_time}\nGamma: {gamma}\nAverage actions taken: {sum}\n")
+        print(
+            f"Finished track {track} on process {process_number} in {end_time - start_time}\nGamma: {gamma}\nAverage actions taken: {sum}\n")
         self.lock.release()
         return
+
 
 class ValueIteratorMultiProcessedExperiments:
     def __init__(self) -> None:
@@ -191,13 +203,14 @@ class ValueIteratorMultiProcessedExperiments:
             print(f"Track: {track}")
             self.lock.release()
             for i in range(len(self.epsilon_values)):
-            # for i in range(1):
-                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.epsilon_values[i], self.default_gamma, "epsilon",),
+                # for i in range(1):
+                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(
+                deepcopy(track), i, self.epsilon_values[i], self.default_gamma, "epsilon",),
                                                          name=f"value_iter_epsilon_process_{track}_{i}"))
 
-                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.default_epsilon, self.gamma_values[i], "gamma",),
+                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(
+                deepcopy(track), i, self.default_epsilon, self.gamma_values[i], "gamma",),
                                                          name=f"value_iter_gamma_process_{track}_{i}"))
-
 
             for process in processes:
                 process.start()
@@ -247,7 +260,6 @@ class ValueIteratorMultiProcessedExperiments:
         print(f"Process {process_index}_{test_param} has finished execution of the racecar.")
         self.queue.put((process_index, actions_taken, epsilon, gamma))
         self.lock.release()
-
 
 
 def main():
