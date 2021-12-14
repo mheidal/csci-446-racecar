@@ -13,7 +13,7 @@ from q_learner import QLearner
 from value_iterator import ValueIterator
 from turtle import Turtle
 
-class MultiProcessedExperiments:
+class QLearnerMultiProcessedExperiments:
 
     def __init__(self) -> None:
         self.lock = multiprocessing.Lock()
@@ -168,14 +168,68 @@ class MultiProcessedExperiments:
         self.lock.release()
         return
 
-def execute_policy(best_action_by_state, track_file: str):
-    model = Model(Track(track_file=track_file, turt=Turtle()))
-    race_car = RaceCar(model.start_state)
-    while race_car.state != model.special_state:
-        action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,
-                                       race_car.state.x_vel, race_car.state.y_vel)]
-        race_car.state = model.transition(race_car.state, action[0], action[1])
-    print('yahoo')
+class ValueIteratorMultiProcessedExperiments:
+    def __init__(self) -> None:
+        self.lock: multiprocessing.Lock = multiprocessing.Lock()
+        self.queue: Queue = Queue()
+        self.output: List = []
+        self.tracks: List = ["L-track", "O-track", "R-track"]
+        self.default_epsilon = 0.5
+        self.default_gamma = 1
+        self.epsilon_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        self.gamma_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        self.experiments_per_track: int = 10
+        self.available_threads: int = 10  # actually 24 but 20 allows for other tasks such as os, temp monitoring, etc
+
+    def experiments(self) -> None:
+        for track in self.tracks:
+            processes: List[Process] = []
+            self.lock.acquire()
+            print(f"Track: {track}")
+            self.lock.release()
+            for i in range(self.experiments_per_track):
+                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.epsilon_values[i], self.default_gamma,),
+                                                         name=f"value_iter_epsilon_process_{track}_{i}"))
+
+                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.default_epsilon, self.gamma_values[i]),
+                                                         name=f"value_iter_epsilon_process_{track}_{i}"))
+
+
+            for process in processes:
+                process.start()
+            self.lock.acquire()
+            print(f"Processes 0-{self.experiments_per_track - 1} started for track: {track}")
+            self.lock.release()
+            for process in processes:
+                self.output.append(self.queue.get())
+                process.join()
+
+            self.lock.acquire()
+            print(f"Processes 0-{self.experiments_per_track - 1} joined for track: {track}")
+            for out in self.output:
+                print(f"Process {out[0]} reached the finish line in {out[1]} actions.")
+            self.lock.release()
+        return
+
+    def _find_and_execute_policy(self, track_file: str, process_index: int, epsilon, gamma):
+        vi: ValueIterator = ValueIterator(track_file=track_file)
+        self.lock.acquire()
+        print(f"Set up transition map for {process_index}")
+        self.lock.release()
+        best_action_by_state = vi.value_iteration()
+        race_car = RaceCar(vi.model.start_state)
+        actions_taken = 0
+        self.lock.acquire()
+        print(f"Process {process_index} is beginning execution of the racecar..")
+        while race_car.state != vi.model.special_state:
+            action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,
+                                           race_car.state.x_vel, race_car.state.y_vel)]
+            race_car.state = vi.model.transition(race_car.state, action[0], action[1])
+            actions_taken += 1
+        self.lock.acquire()
+        print(f"Process {process_index} has finished execution of the racecar.")
+        self.queue.put((process_index, actions_taken))
+        self.lock.release()
 
 
 
@@ -190,13 +244,14 @@ def main():
     # #call simulator
     # simulator.manual_control()
     track_file = "L-track"
-    vi: ValueIterator = ValueIterator(track_file=track_file)
-    best_action_by_state = vi.value_iteration()
-    execute_policy(best_action_by_state, track_file)
+
 
 if __name__ == "__main__":
     # main()
-    mpe: MultiProcessedExperiments = MultiProcessedExperiments()
-    mpe.experiments()
+    # qlmpe: QLearnerMultiProcessedExperiments = QLearnerMultiProcessedExperiments()
+    # qlmpe.experiments()
+    vimpe: ValueIteratorMultiProcessedExperiments = ValueIteratorMultiProcessedExperiments()
+    vimpe.experiments()
+
     # mpe.range_alpha()
     # mpe.range_gamma()

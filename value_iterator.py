@@ -109,9 +109,6 @@ class ValueIterator:
                 q_value = []
                 q_value_actions = []
 
-                if (0 in q_value):
-                    print("heyo")
-
                 # loops through all possible actions
                 for action in self.actions:
 
