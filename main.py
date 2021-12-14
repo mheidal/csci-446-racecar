@@ -233,7 +233,7 @@ class ValueIteratorMultiProcessedExperiments:
             if i > 10000:
                 self.lock.acquire()
                 print(f"Process {process_index}_{test_param} has timed out.")
-                self.queue.put((process_index, float('inf')))
+                self.queue.put((process_index, float('inf'), epsilon, gamma))
                 self.lock.release()
                 return
             action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,

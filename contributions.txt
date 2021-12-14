@@ -1,0 +1,13 @@
+tracks/I-track.txt: Noah Cunningham
+tracks/X-track-transition-map.txt: auto-generated
+contributions.txt: Mike Heidal
+enums.py: Mike Heidal
+geometry.py: Mike Heidal
+main.py: Mike Heidal, Walker Ward
+model.py: Mike Heidal
+q_learner.py: Walker Ward
+race_car.py: Walker Ward
+simulator.py: Walker Ward
+state.py: Mike Heidal
+track.py: Mike Heidal
+value_iterator.py: Noah Cunningham
