@@ -10,7 +10,7 @@ import turtle
 from enums import CellType
 
 class ValueIterator:
-    def __init__(self, track_file: str) -> None:
+    def __init__(self, track_file: str, epsilon, gamma) -> None:
         # initializes variables, classes, and tables i need
         #self.simulator: Simulator = Simulator()
         self.model: Model = Model(Track(track_file=track_file))
@@ -21,6 +21,9 @@ class ValueIterator:
                                    List[Tuple[float, State]]] = {}
         self.policy: Dict[Tuple[int, int, int, int], Tuple[int, int]] = {}
         self.delta = 100
+        self.gamma = gamma
+        self.epsilon = epsilon
+        self.iterations: 0
 
     # initializes all the possible actions
     def init_actions(self):
@@ -88,29 +91,26 @@ class ValueIterator:
         s_a = self.state_action_dict
         old_v = deepcopy(values)
 
-        # tuneable variables
-        training_iterations = 100
-        gamma = 1
-        epsilon = 1
-
-        # loop to run valu iteration
-        #while(self.delta > epsilon):
-        for i in range(training_iterations):
-            #print(i)
+        #keeps track of iterations
+        self.iterations = 0
+        # loop to run value iteration
+        while(self.delta > self.epsilon):
+        #for i in range(training_iterations):
+            self.iterations += 1
+            print(self.iterations)
 
             # variable to be used to refrence the old value table
             old_v = deepcopy(values)
 
             # loops through all possible states
+            max_dif = []
             for state in self.model.track_state_space.values():
+
                 if self.model.track.track[state.y_pos][state.x_pos] == CellType.FINISH:
                     continue
                 #sets a q_value list add and pull the max value from
                 q_value = []
                 q_value_actions = []
-
-                if (0 in q_value):
-                    print("heyo")
 
                 # loops through all possible actions
                 for action in self.actions:
@@ -153,7 +153,7 @@ class ValueIterator:
                         sum_of_T_V = value_of_s_prime * probability_of_transition + sum_of_T_V
 
                     # gets total expected reward, this is the bellman equation
-                    expected_reward = reward_of_sa + (gamma * sum_of_T_V)
+                    expected_reward = reward_of_sa + (self.gamma * sum_of_T_V)
 
                     # updates the state action table
                     s_a[(state.x_pos, state.y_pos, state.x_vel, state.y_vel, action)] = expected_reward
@@ -176,6 +176,27 @@ class ValueIterator:
 
                 #get policy
                 self.policy[(state.x_pos, state.y_pos, state.x_vel, state.y_vel)] = q_value_actions[max_index]
+
+                # compute maximum diffrence
+                # #for state in self.model.track_state_space.values():
+                old_v_value = old_v.get((state.x_pos, state.y_pos, state.x_vel,
+                          state.y_vel))
+
+                values_value = values.get((state.x_pos, state.y_pos, state.x_vel,
+                          state.y_vel))
+
+                max_dif.append(abs(abs(values_value) - abs(old_v_value)))
+
+                # all_values_values = values.values()
+                # max_value_values = max(all_values_values)
+                # all_values_old_v = old_v.values()
+                # max_value_old_v = max(all_values_old_v)
+
+
+                #print(abs(values_value), ' - ', abs(old_v_value))
+            #print("max(max_dif)",max(max_dif))
+            #print("max_dif",max_dif)
+            self.delta = max(max_dif)
 
             # # compute the maximum values change
             # all_values = values.values()

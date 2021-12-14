@@ -172,6 +172,7 @@ def execute_policy(best_action_by_state, track_file: str):
     model = Model(Track(track_file=track_file, turt=Turtle()))
     race_car = RaceCar(model.start_state)
     while race_car.state != model.special_state:
+
         action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,
                                        race_car.state.x_vel, race_car.state.y_vel)]
         race_car.state = model.transition(race_car.state, action[0], action[1])
@@ -193,10 +194,14 @@ def main():
     vi: ValueIterator = ValueIterator(track_file=track_file)
     best_action_by_state = vi.value_iteration()
     execute_policy(best_action_by_state, track_file)
+    x = 0
+    while(True):
+        x += 1
+
 
 if __name__ == "__main__":
-    # main()
-    mpe: MultiProcessedExperiments = MultiProcessedExperiments()
-    mpe.experiments()
+    main()
+    # mpe: MultiProcessedExperiments = MultiProcessedExperiments()
+    # mpe.experiments()
     # mpe.range_alpha()
     # mpe.range_gamma()
