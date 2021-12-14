@@ -192,5 +192,5 @@ class QLearner:
 
 if __name__ == "__main__":
     q_learner: QLearner = QLearner()
-    q_learner.q_learn(number_of_episodes=100, viewable_episodes=1)
+    q_learner.q_learn(number_of_episodes=25000, viewable_episodes=10)
     pass

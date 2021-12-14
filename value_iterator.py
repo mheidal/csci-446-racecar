@@ -25,16 +25,21 @@ class ValueIterator:
         self.epsilon = epsilon
         self.iterations: 0
 
-    # initializes all the possible actions
     def init_actions(self):
+        """
+        initializes all the possible actions
+        :return:
+        """
         for x_acceleration in [-1, 0, 1]:
             for y_acceleration in [-1, 0, 1]:
                 self.actions.append((x_acceleration, y_acceleration))
 
     def init_value_iteration(self):
+        """
+        initalize non goal states to -1, and the goal staes to 0 in the value table
+        :return:
+        """
         self.init_actions()
-
-        # initalize non goal states to -1, and the goal staes to 0 in the value table
         rows, columns = self.model.track.track.shape
         for x_position in range(columns-1):
             for y_position in range(rows-1):
@@ -45,26 +50,12 @@ class ValueIterator:
                         else:
                             self.reward_dictionary[(x_position, y_position, x_velocity, y_velocity)] = -1
 
-        # initalizes the transition dictionary because its quicker to look at the transistion dictionary
-        # than call transition many times in value iteration
-
-    def init_transition_dict (self):
-        rows, columns = self.model.track.track.shape
-        for x_position in range(columns-1):
-            for y_position in range(rows-1):
-                for x_velocity in range(-5, 6):
-                    for y_velocity in range(-5 , 6):
-                        for action in self.actions:
-                            state = State(x_position, y_position, x_velocity, y_velocity)
-                            if self.model.track.track[y_position][x_position] == CellType.FINISH:
-                                self.transition_dict[(x_position, y_position, x_velocity, y_velocity, action)] = \
-                                    self.model.get_transitions_and_probabilities(state, action[0], action[1])
-                            elif self.model.track.track[y_position][x_position] != CellType.WALL:
-                                self.transition_dict[(x_position, y_position, x_velocity, y_velocity, action)] = \
-                                    self.model.get_transitions_and_probabilities(state, action[0], action[1])
-
-    # inits the state_action_dict, which is a dict that has state action pairs for keys and the reward for the value
     def init_policy_extraction(self):
+        """
+        inits the state_action_dict,
+        which is a dict that has state action pairs for keys and the reward for the value
+        :return:
+        """
         rows, columns = self.model.track.track.shape
         for x_position in range(columns - 1):
             for y_position in range(rows - 1):
@@ -83,6 +74,12 @@ class ValueIterator:
                                 # self.poop += 1
 
     def value_iteration(self):
+        """
+        Use the Bellman equation
+        ( Q(s,a) = max ( R(s,a) + (gamma) sum_s' T(s,a,s') Vt-1(s') )
+        to find an expected reward for each state and the most optimal action.
+        :return policy:
+        """
         # initializes all the variables i need
         self.init_value_iteration()
         values = self.reward_dictionary
@@ -90,14 +87,14 @@ class ValueIterator:
         self.init_policy_extraction()
         s_a = self.state_action_dict
         old_v = deepcopy(values)
-
-        #keeps track of iterations
         self.iterations = 0
+
         # loop to run value iteration
         while(self.delta > self.epsilon):
-        #for i in range(training_iterations):
+
+            # keeps track of iterations
             self.iterations += 1
-            # print(self.iterations)
+            print(self.iterations)
 
             # variable to be used to refrence the old value table
             old_v = deepcopy(values)
@@ -106,8 +103,10 @@ class ValueIterator:
             max_dif = []
             for state in self.model.track_state_space.values():
 
+                #if statment to account for starting in a finished state
                 if self.model.track.track[state.y_pos][state.x_pos] == CellType.FINISH:
                     continue
+
                 #sets a q_value list add and pull the max value from
                 q_value = []
                 q_value_actions = []
@@ -138,7 +137,7 @@ class ValueIterator:
                         # get T(s,a,s'), probability that s, a, s' happens
                         probability_of_transition = s_prime[0]
 
-                        # if statment to set wall values
+                        # if statment to debug special state problem
                         if (self.model.track.track[s_prime_state.y_pos][s_prime_state.x_pos] == CellType.WALL
                                 and not (s_prime_state.y_pos == -1 or s_prime_state.x_pos == -1)):
                              self.model.track.t = turtle.Turtle()
@@ -187,51 +186,9 @@ class ValueIterator:
 
                 max_dif.append(abs(abs(values_value) - abs(old_v_value)))
 
-                # all_values_values = values.values()
-                # max_value_values = max(all_values_values)
-                # all_values_old_v = old_v.values()
-                # max_value_old_v = max(all_values_old_v)
-
-
-                #print(abs(values_value), ' - ', abs(old_v_value))
-            #print("max(max_dif)",max(max_dif))
-            #print("max_dif",max_dif)
             self.delta = max(max_dif)
 
         return self.policy
-
-    # not currently using methods beneath this line
-
-    # def extract_policy(self):
-    #     # Q(s,a) = argmax ( R(s,a) + gamma sum s' T(s,a,s') Vt-1(s') )
-    #
-    #     policy = {}
-    #
-    #     rows, columns = self.simulator.model.track.track.shape
-    #     for x_position in range(columns - 1):
-    #         for y_position in range(rows - 1):
-    #             for x_velocity in range(-5, 6):
-    #                 for y_velocity in range(-5, 6):
-    #                     for a in self.actions:
-    #                         pass
-    #                         # if self.state_action_dict[(state.x_pos, state.y_pos, state.x_vel, state.y_vel, q_value[max_index])]
-    #                         # policy[(x_position, y_position, x_velocity, y_velocity)] = max_action
-    #
-    #     for s_a in self.state_action_dict:
-    #         pass
-    #
-    #     return policy
-
-    # def execute_policy(self) -> None:
-    #     pass
-
-    # def update_q(self) -> Dict[Tuple[int, int], int]:
-    #     pass
-    def execute_policy(self) -> None:
-        pass
-
-    def update_q(self) -> Dict[Tuple[int, int], int]:
-        pass
 
 
 

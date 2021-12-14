@@ -1,4 +1,5 @@
 import multiprocessing
+import turtle
 from copy import deepcopy
 from datetime import datetime
 from multiprocessing import Process, Queue
@@ -246,6 +247,21 @@ class ValueIteratorMultiProcessedExperiments:
         self.lock.release()
 
 
+def execute_policy(track_file: str, epsilon, gamma):
+    vi: ValueIterator = ValueIterator(track_file=track_file, epsilon=epsilon, gamma=gamma)
+    best_action_by_state = vi.value_iteration()
+    race_car = RaceCar(vi.model.start_state)
+    actions_taken = 0
+    i = 0
+    vi.model.track.t = turtle.Turtle()
+    vi.model.track.display_track_with_turtle()
+    while race_car.state != vi.model.special_state:
+        i += 1
+        action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,
+                                       race_car.state.x_vel, race_car.state.y_vel)]
+        race_car.state = vi.model.transition(race_car.state, action[0], action[1])
+        actions_taken += 1
+
 
 def main():
     # track: Track = Track()
@@ -257,21 +273,23 @@ def main():
     # print("w = Up, a = Left, s = Down, d = Right ")
     # #call simulator
     # simulator.manual_control()
-    track_file = "R-track"
-    vi: ValueIterator = ValueIterator(track_file=track_file)
-    best_action_by_state = vi.value_iteration()
-    execute_policy(best_action_by_state, track_file)
+
+
+    track_file = "L-track"
+  #  vi: ValueIterator = ValueIterator(track_file=track_file, epsilon=0.5, gamma=1)
+  #  best_action_by_state = vi.value_iteration()
+    execute_policy(track_file, epsilon=0.5, gamma=1)
     x = 0
     while(True):
         x += 1
 
 
 if __name__ == "__main__":
-    # main()
+    main()
     # qlmpe: QLearnerMultiProcessedExperiments = QLearnerMultiProcessedExperiments()
     # qlmpe.experiments()
-    vimpe: ValueIteratorMultiProcessedExperiments = ValueIteratorMultiProcessedExperiments()
-    vimpe.experiments()
+    # vimpe: ValueIteratorMultiProcessedExperiments = ValueIteratorMultiProcessedExperiments()
+    # vimpe.experiments()
 
     # mpe.range_alpha()
     # mpe.range_gamma()
