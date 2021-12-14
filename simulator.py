@@ -24,38 +24,15 @@ class Simulator:
         self.race_car: RaceCar = RaceCar(start_state)
         self.time: int = 0
 
-    # def time_step(self) -> None:
-    #     self.time += 1
-    #     self.act()
-
-    # def act(self, a_x: int = None, a_y: int = None) -> None:
-    #     if not a_x and not a_y:
-    #         self.race_car.state = self.model.transition(self.race_car.state, random.choice([-1, 0, 1]),
-    #                                                     random.choice([-1, 0, 1]))
-    #     else:
-    #         self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
-
     def act(self, a_x: int, a_y: int) -> None:
+        """
+        Calls the transition function in this simulators model
+        :param a_x: new acceleration for the racecar in the x direction
+        :param a_y: new accleration for the racecar in the y direction
+        :return: None.
+        """
         self.race_car.state = self.model.transition(self.race_car.state, a_x, a_y)
         self.time += 1
-
-    # def manual_control(self) -> None:
-    #     print(self.model.track.detect_finish(self.race_car.state))
-    #     while(self.model.track.detect_finish(self.race_car.state) == False):
-    #         direction = input("")
-    #         # if you press a
-    #         if (direction == 'a'):
-    #             self.race_car.state = self.model.transition(self.race_car.state, 0, -1)
-    #         # if you press d
-    #         if (direction == 'd'):
-    #             self.race_car.state = self.model.transition(self.race_car.state, 0, 1)
-    #         # if you press w
-    #         if (direction == 'w'):
-    #             self.race_car.state = self.model.transition(self.race_car.state, 1, 0)
-    #         # if you press s
-    #         if (direction == 's'):
-    #             self.race_car.state = self.model.transition(self.race_car.state, -1, 0)
-    #         print(self.__str__())
 
     def __str__(self):
         # if self._str == "":
@@ -76,12 +53,3 @@ class Simulator:
             string += "\n"
             self._str = string
         return self._str
-
-
-if __name__ == "__main__":
-    sim: Simulator = Simulator()
-    print(sim.race_car)
-    for i in range(0, 100):
-        sim.time_step()
-        sim.act()
-    pass
