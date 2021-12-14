@@ -173,11 +173,11 @@ class ValueIteratorMultiProcessedExperiments:
         self.lock: multiprocessing.Lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
         self.output: List = []
-        self.tracks: List = ["L-track", "O-track", "R-track"]
+        self.tracks: List = ["L-track"]
         self.default_epsilon = 0.5
         self.default_gamma = 1
         self.epsilon_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
-        self.gamma_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
+        self.gamma_values = [0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
         self.experiments_per_track: int = 10
         self.available_threads: int = 10
 
@@ -208,7 +208,7 @@ class ValueIteratorMultiProcessedExperiments:
             self.lock.acquire()
             print(f"Processes 0-{self.experiments_per_track - 1} joined for track: {track}")
             for out in self.output:
-                print(f"Process {out[0]} reached the finish line in {out[1]} actions.")
+                print(f"Process {out[0]} reached the finish line in {out[1]} actions.\n\tE:{out[2]}\n\tG:{out[3]}")
             self.lock.release()
         return
 
@@ -242,7 +242,7 @@ class ValueIteratorMultiProcessedExperiments:
             actions_taken += 1
         self.lock.acquire()
         print(f"Process {process_index}_{test_param} has finished execution of the racecar.")
-        self.queue.put((process_index, actions_taken))
+        self.queue.put((process_index, actions_taken, epsilon, gamma))
         self.lock.release()
 
 
