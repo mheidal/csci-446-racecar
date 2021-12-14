@@ -173,7 +173,7 @@ class ValueIteratorMultiProcessedExperiments:
         self.lock: multiprocessing.Lock = multiprocessing.Lock()
         self.queue: Queue = Queue()
         self.output: List = []
-        self.tracks: List = ["L-track"]
+        self.tracks: List = ["R-track"]
         self.default_epsilon = 0.5
         self.default_gamma = 1
         self.epsilon_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
