@@ -179,7 +179,7 @@ class ValueIteratorMultiProcessedExperiments:
         self.epsilon_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
         self.gamma_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
         self.experiments_per_track: int = 10
-        self.available_threads: int = 10  # actually 24 but 20 allows for other tasks such as os, temp monitoring, etc
+        self.available_threads: int = 10
 
     def experiments(self) -> None:
         for track in self.tracks:
@@ -187,18 +187,19 @@ class ValueIteratorMultiProcessedExperiments:
             self.lock.acquire()
             print(f"Track: {track}")
             self.lock.release()
-            for i in range(self.experiments_per_track):
-                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.epsilon_values[i], self.default_gamma,),
+            for i in range(len(self.epsilon_values)):
+            # for i in range(1):
+                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.epsilon_values[i], self.default_gamma, "epsilon",),
                                                          name=f"value_iter_epsilon_process_{track}_{i}"))
 
-                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.default_epsilon, self.gamma_values[i]),
-                                                         name=f"value_iter_epsilon_process_{track}_{i}"))
+                processes.append(multiprocessing.Process(target=self._find_and_execute_policy, args=(deepcopy(track), i, self.default_epsilon, self.gamma_values[i], "gamma",),
+                                                         name=f"value_iter_gamma_process_{track}_{i}"))
 
 
             for process in processes:
                 process.start()
             self.lock.acquire()
-            print(f"Processes 0-{self.experiments_per_track - 1} started for track: {track}")
+            print(f"Processes 0-{len(self.epsilon_values) - 1} started for track: {track}")
             self.lock.release()
             for process in processes:
                 self.output.append(self.queue.get())
@@ -211,23 +212,36 @@ class ValueIteratorMultiProcessedExperiments:
             self.lock.release()
         return
 
-    def _find_and_execute_policy(self, track_file: str, process_index: int, epsilon, gamma):
-        vi: ValueIterator = ValueIterator(track_file=track_file)
+    def _find_and_execute_policy(self, track_file: str, process_index: int, epsilon, gamma, test_param: str):
+        vi: ValueIterator = ValueIterator(track_file=track_file, epsilon=epsilon, gamma=gamma)
         self.lock.acquire()
-        print(f"Set up transition map for {process_index}")
+        print(f"Set up transition map for {process_index}_{test_param}")
         self.lock.release()
         best_action_by_state = vi.value_iteration()
         race_car = RaceCar(vi.model.start_state)
         actions_taken = 0
         self.lock.acquire()
-        print(f"Process {process_index} is beginning execution of the racecar..")
+        print(f"Process {process_index}_{test_param} is beginning execution of the racecar.")
+        self.lock.release()
+        i = 0
         while race_car.state != vi.model.special_state:
+            i += 1
+            if i % 2500 == 0:
+                self.lock.acquire()
+                print(f"Process {process_index}_{test_param} has transitioned {i} times.")
+                self.lock.release()
+            if i > 10000:
+                self.lock.acquire()
+                print(f"Process {process_index}_{test_param} has timed out.")
+                self.queue.put((process_index, float('inf')))
+                self.lock.release()
+                return
             action = best_action_by_state[(race_car.state.x_pos, race_car.state.y_pos,
                                            race_car.state.x_vel, race_car.state.y_vel)]
             race_car.state = vi.model.transition(race_car.state, action[0], action[1])
             actions_taken += 1
         self.lock.acquire()
-        print(f"Process {process_index} has finished execution of the racecar.")
+        print(f"Process {process_index}_{test_param} has finished execution of the racecar.")
         self.queue.put((process_index, actions_taken))
         self.lock.release()
 
