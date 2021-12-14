@@ -5,9 +5,9 @@ enums.py: Mike Heidal
 geometry.py: Mike Heidal
 main.py: Mike Heidal, Walker Ward, Noah Cunningham
 model.py: Mike Heidal, Noah Cunningham
-q_learner.py: Walker Ward
+q_learner.py: Mike Heidal, Walker Ward
 race_car.py: Walker Ward
 simulator.py: Walker Ward
 state.py: Mike Heidal
 track.py: Mike Heidal
-value_iterator.py: Noah Cunningham
+value_iterator.py: Mike Heidal, Noah Cunningham
