@@ -198,32 +198,6 @@ class ValueIterator:
             #print("max_dif",max_dif)
             self.delta = max(max_dif)
 
-            # # compute the maximum values change
-            # all_values = values.values()
-            # max_value = max(all_values)
-            # max_key = max(values, key=values.get)
-            #
-            # all_o_values = values.values()
-            # o_max_value = max(all_o_values)
-            # o_max_key = max(old_v, key=old_v.get)
-            #
-            # self.delta = abs(max_value - o_max_value)
-            # print(max_value, ' - ', o_max_value)
-            # print(self.delta)
-
-            # # compute maximum diffrence
-            # max_dif = []
-            # for state in self.model.track_state_space.values():
-            #     old_v_value = old_v.get((state.x_pos, state.y_pos, state.x_vel,
-            #               state.y_vel))
-            #     values_value = values.get((state.x_pos, state.y_pos, state.x_vel,
-            #               state.y_vel))
-            #     max_dif.append(values_value - old_v_value)
-            #     print(values_value, ' - ', old_v_value)
-            #     print("max(max_dif)",max(max_dif))
-            #     print("max_dif",max_dif)
-            # self.delta = max(max_dif)
-
         return self.policy
 
     # not currently using methods beneath this line

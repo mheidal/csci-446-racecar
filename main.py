@@ -190,7 +190,7 @@ def main():
     # print("w = Up, a = Left, s = Down, d = Right ")
     # #call simulator
     # simulator.manual_control()
-    track_file = "L-track"
+    track_file = "R-track"
     vi: ValueIterator = ValueIterator(track_file=track_file)
     best_action_by_state = vi.value_iteration()
     execute_policy(best_action_by_state, track_file)
