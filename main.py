@@ -14,6 +14,9 @@ from value_iterator import ValueIterator
 from turtle import Turtle
 
 class QLearnerMultiProcessedExperiments:
+    """
+    QLearnerMultiProcessedExperiments implements the MultiProcessing library to run multiple tests on q-learn at once.
+    """
 
     def __init__(self) -> None:
         self.lock = multiprocessing.Lock()

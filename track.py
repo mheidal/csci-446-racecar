@@ -12,7 +12,10 @@ scale_factor: float = 5
 
 
 class Track:
-
+    """
+    Class representing the track on which the race car travels.
+    Includes a numpy array representing the track and methods used to determine how the race car moves.
+    """
     def __init__(self, track_file: str = "I-track", *, turt: turtle.Turtle = None, progressive_start_states=False):
         self.start_states: List[State] = []
         self.finish_states: List[State] = []
@@ -43,6 +46,12 @@ class Track:
         return start_state
 
     def progressive_start_states(self) -> List[List[State]]:
+        """
+        Gets a list of lists of start states, used in Q-learning to train the AI on parts of the track closest to the
+        finish line.
+        Uses a breadth first search to determine sets of starting states.
+        :return: A list of lists of starting states.
+        """
         alphanums = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         arr = np.full(self.track.shape, '#')
         queue = []
@@ -88,8 +97,19 @@ class Track:
 
         return start_state_sets
 
-    def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[
-        Tuple[Tuple[int, int], List[LineSegment]]]:
+    def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[Tuple[Tuple[int, int], List[LineSegment]]]:
+        """
+        Creates a list of all line segments which form the boundaries of the square cells on the track which are of
+        the type specified in the parameters. Only returns the boundaries of the cells which are inside the "bounding
+        box", which is a line segment composing the diagonal of a rectangle. If the center of a cell is within the
+        bounding box, then the boundaries of that cell are returned, so long as the cell's type is of the type queried.
+        Used to determine whether the race car is intersecting the boundaries of a finish line or a wall.
+        :param type: The type of the cell whose boundaries are desired.
+        :param bounding_box: A line segment; the method only returns the boundaries of the cells whose centers are
+        within the bounding box.
+        :return: A list of tuples of coordinates of a cell and a list of the line segments which compose the borders
+        of that cell.
+        """
         cells: List[Tuple[Tuple[int, int], List[LineSegment]]] = []
         for y, row in enumerate(self.track):
             for x, cell in enumerate(row):
@@ -108,6 +128,12 @@ class Track:
         return cells
 
     def get_transition_type(self, state: State) -> Union[TransitionType, Tuple[TransitionType, Point]]:
+        """
+        Determines how the race car moves across the track.
+        :param state:
+        :return: A TransitionType indicating that the race car, on its current trajectory, will hit a wall, cross
+        a finish line, or simply move across the track. Uses various geometric functions to do so.
+        """
         if state.y_vel == 0 and state.x_vel == 0:
             return TransitionType.MOVE
         trajectory: LineSegment = LineSegment(Point(state.x_pos, state.y_pos),
@@ -146,7 +172,8 @@ class Track:
                             closest_intersection = (new_dist, TransitionType.WIN)
 
         # I'm just gonna comment all this out and simplify how crashing works with crash type "stop". Crashing will
-        # now just put you back where you last were with your velocity dead.
+        # now just put you back where you last were with your velocity dead. I think this mostly works, but
+        # I can't fix all the bugs in time!
         # if closest_intersection[1] == TransitionType.CRASH:
         #     furthest_track_boundary: Tuple[float, Point] = None
         #     driveable_cells = self.get_boundaries_of_type(CellType.TRACK, trajectory) + \
@@ -201,31 +228,11 @@ class Track:
 
         return closest_intersection[1]
 
-    def get_transition_type_without_point(self, state: State):
-        transition_data = self.get_transition_type(state)
-        return transition_data[0] if type(transition_data) == tuple else transition_data
-
-    # def detect_collision(self, state: State) -> bool:
-    #     trajectory: LineSegment = LineSegment(Point(state.x_pos, state.y_pos),
-    #                              Point(state.x_pos + state.x_vel, state.y_pos + state.y_vel))
-    #     wall_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.WALL)
-    #     for cell in wall_cells:
-    #         for line_segment in cell:
-    #             if detect_if_intersect(trajectory, line_segment):
-    #                 return True
-    #     return False
-    #
-    # def detect_finish(self, state: State) -> bool:
-    #     trajectory: LineSegment = LineSegment(Point(state.x_pos, state.y_pos),
-    #                                           Point(state.x_pos + state.x_vel, state.y_pos + state.y_vel))
-    #     finish_cells: List[List[LineSegment]] = self.get_boundaries_of_type(CellType.FINISH)
-    #     for cell in finish_cells:
-    #         for line_segment in cell:
-    #             if detect_if_intersect(trajectory, line_segment):
-    #                 return True
-    #     return False
-
     def parse_file(self, track_file: str):
+        """
+        Takes a file as input and creates a numpy array which represents the track represented on the file.
+        :param track_file: the file to use as input.
+        """
         filename: str = "tracks/" + track_file + ".txt"
         f = open(filename)
         x, y = f.readline().strip('\n').split(',')
@@ -272,6 +279,11 @@ class Track:
             return self._str
 
     def display_track_with_turtle(self):
+        """
+        A vanity method used to display the track using the turtle module. Draws all walls on the board, as well as
+        coordinate labels.
+        :return:
+        """
         self.s = turtle.getscreen()
         self.s.tracer(0)
         self.t = turtle.Turtle()
@@ -308,6 +320,10 @@ class Track:
         self.s.update()
 
     def display_transition_with_turtle(self, initial_state: State):
+        """
+        A vanity method used to draw the motion of a race car across the board using the turtle module.
+        :param initial_state: The initial state of the race car, containing both coordinates and velocity.
+        """
         transition_data = self.get_transition_type(initial_state)
         if type(transition_data) == tuple:
             transition_type = transition_data[0]
