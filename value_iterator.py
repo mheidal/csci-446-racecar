@@ -97,7 +97,7 @@ class ValueIterator:
         while(self.delta > self.epsilon):
         #for i in range(training_iterations):
             self.iterations += 1
-            print(self.iterations)
+            # print(self.iterations)
 
             # variable to be used to refrence the old value table
             old_v = deepcopy(values)
