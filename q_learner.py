@@ -21,6 +21,10 @@ class QLearner:
         self.temperature: int = 1
 
     def init_q(self) -> None:
+        """
+        Initializes the Q-table
+        :return: None.
+        """
         rows, columns = self.simulator.model.track.track.shape
         for x_position in range(columns):
             for y_position in range(rows):
@@ -38,6 +42,14 @@ class QLearner:
         return
 
     def q_learn(self, *, number_of_episodes: int = 50000, viewable_episodes: int = 1, alpha_rate: float = 0.9952) -> List[int]:
+        """
+        This is the method that actually runs the Q-learning algorithm.
+        :param number_of_episodes: Number of episodes to run on.
+        :param viewable_episodes: Number of episodes at the end to view in Turtle graphics view
+        :param alpha_rate: alpha, the learning rate for this Q-learner
+        :return: List of ints representing the number of actions it took for each episode to get from the start state to the finish state.
+        """
+        # Sudo code for algorithm:
         # init all Q(s, a) arbitrarily
         # for all episodes do the following
         #   initialize s
@@ -52,11 +64,6 @@ class QLearner:
         #       s <-- s'
         #   until s is terminal state: if x,y is a finish state... detect_finish() from Track maybe?
         # end for loop
-
-        # Additions:
-        # Verify self.q is updating correctly (it's not)
-        # Tune params
-        # number of episodes should be equal to number or restarts from sim.
 
         self.init_q()
 
@@ -134,6 +141,11 @@ class QLearner:
         return results
 
     def boltzmann_distribution(self, state: State) -> Tuple[List[Tuple[int, int]], List[Any]]:
+        """
+        Applies the Boltzmann Distribution to get a probability distribution for all possible actions at this state
+        :param state: Current state of this Q-Learner agent
+        :return: Tuple with a list of states and a list of floats that represent the probability distribution for those states
+        """
         # this should be the probability distributions for the possible actions at this state
 
         keys_list: List[Tuple[State, Tuple[int, int]]] = []
@@ -174,6 +186,11 @@ class QLearner:
         return list(probability_distribution_a_given_s), list(probability_distribution_a_given_s.values())  # boltzman distrib should replace this
 
     def q_max(self, state: State) -> Tuple[State, Tuple[int, int]]:
+        """
+        Gets the key (state action pair) associated with the maximum value in the q-table.
+        :param state: State to get the key for
+        :return: state action pair with the highest value in the q-table.
+        """
         keys_list: List[Tuple[State, Tuple[int, int]]] = []
         for x_acceleration in [-1, 0, 1]:
             for y_acceleration in [-1, 0, 1]:
