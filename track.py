@@ -3,7 +3,6 @@ from typing import List, Tuple, Union
 import numpy as np
 from enums import CellType, TransitionType
 
-
 from geometry import Point, LineSegment, detect_if_intersect, find_intersection_point, euclid_dist
 from state import State
 
@@ -11,9 +10,10 @@ import turtle
 
 scale_factor: float = 5
 
+
 class Track:
 
-    def __init__(self, track_file: str = "I-track", *, turt: turtle.Turtle = None, progressive_start_states = False):
+    def __init__(self, track_file: str = "I-track", *, turt: turtle.Turtle = None, progressive_start_states=False):
         self.start_states: List[State] = []
         self.finish_states: List[State] = []
         self.track = self.parse_file(track_file)
@@ -30,6 +30,10 @@ class Track:
             self.display_track_with_turtle()
 
     def start_state(self) -> State:
+        """
+        Gets a start state from this Track
+        :return: Start state from this Track.
+        """
         start_state = random.choice(self.start_states)
         if self.t is not None:
             self.t.penup()
@@ -57,7 +61,7 @@ class Track:
                     for y_adj in [-1, 0, 1]:
                         if arr[cell['y'] + y_adj][cell['x'] + x_adj] == "#":
                             arr[cell['y'] + y_adj][cell['x'] + x_adj] = alphanums[alphanums.index(val) + 1]
-                            queue.append({'x':cell['x'] + x_adj, 'y':cell['y'] + y_adj})
+                            queue.append({'x': cell['x'] + x_adj, 'y': cell['y'] + y_adj})
         start_state_sets: List[List[State]] = []
         for i in alphanums:
             if i != '0':
@@ -84,7 +88,8 @@ class Track:
 
         return start_state_sets
 
-    def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[Tuple[Tuple[int, int], List[LineSegment]]]:
+    def get_boundaries_of_type(self, type: CellType, bounding_box: LineSegment) -> List[
+        Tuple[Tuple[int, int], List[LineSegment]]]:
         cells: List[Tuple[Tuple[int, int], List[LineSegment]]] = []
         for y, row in enumerate(self.track):
             for x, cell in enumerate(row):
